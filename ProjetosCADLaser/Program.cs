@@ -13,23 +13,37 @@ namespace ProjetosCADLaser
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             var servicos = new AppServices();
+
             ConfiguracaoLocal configuracao;
             string erro;
+
+            // TEMPORÁRIO:
+            // Durante o desenvolvimento, não abrir a tela de primeiro uso.
             if (servicos.Inicializacao.PrimeiroUsoNecessario(out configuracao, out erro))
             {
-                using (var primeiroUso = new PrimeiroUsoForm(servicos, erro))
+                configuracao = new ConfiguracaoLocal
                 {
-                    if (primeiroUso.ShowDialog() != DialogResult.OK) return;
-                }
-                configuracao = servicos.ConfiguracaoLocal.Carregar();
+                    NomeExibido = Environment.UserName,
+                    UsuarioAtivo = true,
+                    Perfil = PerfilUsuario.Operacional
+                };
             }
+
             if (!configuracao.UsuarioAtivo)
             {
-                MessageBox.Show("Este usuário está inativo. Procure o administrador.", "Acesso bloqueado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "Este usuário está inativo. Procure o administrador.",
+                    "Acesso bloqueado",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
                 return;
             }
+
             servicos.Tema.Definir(configuracao.Tema);
+
             Application.Run(new TelaInicialForm(servicos, configuracao));
         }
     }
