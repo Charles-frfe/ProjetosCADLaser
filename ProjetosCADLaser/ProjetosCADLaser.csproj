@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props" Condition="Exists('$(MSBuildToolsPath)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -88,38 +88,83 @@
     <Compile Include="Forms\FormTemporarioCompilacao.Designer.cs">
       <DependentUpon>FormTemporarioCompilacao.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\PrimeiroUsoForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\PrimeiroUsoForm.Designer.cs"><DependentUpon>PrimeiroUsoForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\PrimeiroUsoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PrimeiroUsoForm.Designer.cs">
+      <DependentUpon>PrimeiroUsoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\FolderPicker.cs" />
     <EmbeddedResource Include="Forms\PrimeiroUsoForm.resx" />
-    <Compile Include="Forms\TelaInicialForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\TelaInicialForm.Designer.cs"><DependentUpon>TelaInicialForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\TelaInicialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TelaInicialForm.Designer.cs">
+      <DependentUpon>TelaInicialForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\TelaInicialForm.resx" />
-    <Compile Include="Forms\CadastroPilotoForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\CadastroPilotoForm.Designer.cs"><DependentUpon>CadastroPilotoForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\CadastroPilotoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CadastroPilotoForm.Designer.cs">
+      <DependentUpon>CadastroPilotoForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\CadastroPilotoForm.resx" />
-    <Compile Include="Forms\PesquisaForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\PesquisaForm.Designer.cs"><DependentUpon>PesquisaForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\PesquisaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PesquisaForm.Designer.cs">
+      <DependentUpon>PesquisaForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\PesquisaForm.resx" />
-    <Compile Include="Forms\FichaTecnicaForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\FichaTecnicaForm.Designer.cs"><DependentUpon>FichaTecnicaForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\FichaTecnicaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FichaTecnicaForm.Designer.cs">
+      <DependentUpon>FichaTecnicaForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\FichaTecnicaForm.resx" />
-    <Compile Include="Forms\EditarPilotoForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\EditarPilotoForm.Designer.cs"><DependentUpon>EditarPilotoForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\EditarPilotoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditarPilotoForm.Designer.cs">
+      <DependentUpon>EditarPilotoForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\EditarPilotoForm.resx" />
-    <Compile Include="Forms\LixeiraForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\LixeiraForm.Designer.cs"><DependentUpon>LixeiraForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\LixeiraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\LixeiraForm.Designer.cs">
+      <DependentUpon>LixeiraForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\LixeiraForm.resx" />
-    <Compile Include="Forms\TesteTexturaForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\TesteTexturaForm.Designer.cs"><DependentUpon>TesteTexturaForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\TesteTexturaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TesteTexturaForm.Designer.cs">
+      <DependentUpon>TesteTexturaForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\TesteTexturaForm.resx" />
-    <Compile Include="Forms\PesquisaTestesForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\PesquisaTestesForm.Designer.cs"><DependentUpon>PesquisaTestesForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\PesquisaTestesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PesquisaTestesForm.Designer.cs">
+      <DependentUpon>PesquisaTestesForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\PesquisaTestesForm.resx" />
-    <Compile Include="Forms\FichaTesteTexturaForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\FichaTesteTexturaForm.Designer.cs"><DependentUpon>FichaTesteTexturaForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\FichaTesteTexturaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FichaTesteTexturaForm.Designer.cs">
+      <DependentUpon>FichaTesteTexturaForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\FichaTesteTexturaForm.resx" />
-    <Compile Include="Forms\EditarTesteTexturaForm.cs"><SubType>Form</SubType></Compile>
-    <Compile Include="Forms\EditarTesteTexturaForm.Designer.cs"><DependentUpon>EditarTesteTexturaForm.cs</DependentUpon></Compile>
+    <Compile Include="Forms\EditarTesteTexturaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditarTesteTexturaForm.Designer.cs">
+      <DependentUpon>EditarTesteTexturaForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Forms\EditarTesteTexturaForm.resx" />
     <Compile Include="Utilities\Apresentacao.cs" />
     <Compile Include="Program.cs" />

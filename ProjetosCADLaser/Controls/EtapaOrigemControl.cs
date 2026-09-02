@@ -11,7 +11,7 @@ namespace ProjetosCADLaser.Controls
         private readonly Button _analisar = new Button { Text = "Analisar pasta", AutoSize = true };
         public EtapaOrigemControl() { AutoSize = true; Dock = DockStyle.Fill; var linha = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, WrapContents = false }; linha.Controls.Add(_pasta); linha.Controls.Add(_selecionar); linha.Controls.Add(_analisar); Controls.Add(linha); _selecionar.Click += delegate
 {
-    var pastaSelecionada = FolderPicker.Selecionar(
+    var pastaSelecionada = ProjetosCADLaser.Utilities.FolderPicker.Selecionar(
         Handle,
         "Selecione a pasta de origem",
         Pasta);

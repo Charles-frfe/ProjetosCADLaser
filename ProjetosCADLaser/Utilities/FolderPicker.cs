@@ -44,7 +44,7 @@ namespace ProjetosCADLaser.Utilities
 
                 var resultado = dialogo.Show(janelaPai);
 
-                // Cancelado pelo usu√°rio
+                // Cancelado pelo usu·rio
                 if (resultado == unchecked((int)0x800704C7))
                     return null;
 
