@@ -3,6 +3,8 @@ using System.Windows.Forms;
 using ProjetosCADLaser.Forms;
 using ProjetosCADLaser.Models;
 using ProjetosCADLaser.Services;
+using System.IO;
+using ProjetosCADLaser.Configuration;
 
 namespace ProjetosCADLaser
 {
@@ -21,15 +23,25 @@ namespace ProjetosCADLaser
 
             // TEMPORÁRIO:
             // Durante o desenvolvimento, não abrir a tela de primeiro uso.
-            if (servicos.Inicializacao.PrimeiroUsoNecessario(out configuracao, out erro))
-            {
-                configuracao = new ConfiguracaoLocal
-                {
-                    NomeExibido = Environment.UserName,
-                    UsuarioAtivo = true,
-                    Perfil = PerfilUsuario.Operacional
-                };
-            }
+            if (servicos.Inicializacao.PrimeiroUsoNecessario(
+    out configuracao,
+    out erro))
+{
+    var pastaDesenvolvimento = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "ProjetosCADLaser_DEV");
+
+    Directory.CreateDirectory(pastaDesenvolvimento);
+    EstruturaDados.Criar(pastaDesenvolvimento);
+
+    configuracao = new ConfiguracaoLocal
+    {
+        PastaRaizDados = pastaDesenvolvimento,
+        NomeExibido = Environment.UserName,
+        UsuarioAtivo = true,
+        Perfil = PerfilUsuario.Operacional
+    };
+}
 
             if (!configuracao.UsuarioAtivo)
             {
