@@ -64,7 +64,12 @@ namespace ProjetosCADLaser.Forms
             _heartbeat.Tick += delegate { if (_bloqueio != null && !string.IsNullOrWhiteSpace(_caminhoBloqueio)) try { _servicos.Bloqueios.Atualizar(_caminhoBloqueio, _bloqueio); } catch { } };
             FormClosed += delegate { _heartbeat.Stop(); if (_bloqueio != null && !string.IsNullOrWhiteSpace(_caminhoBloqueio)) try { _servicos.Bloqueios.Remover(_caminhoBloqueio, _bloqueio); } catch { } _bloqueio = null; try { _servicos.Anexos.LimparSessao(_sessaoAnexos); } catch { } };
             if (local == null || string.IsNullOrWhiteSpace(local.PastaRaizDados)) throw new InvalidOperationException("A pasta raiz não está configurada.");
-            Text = "Cadastrar piloto — Projetos CAD/LASER"; StartPosition = FormStartPosition.CenterParent; Size = new Size(760, 460); MinimumSize = new Size(700, 400); Font = new Font("Segoe UI", 10F);
+            Text = "Cadastrar piloto — Projetos CAD/LASER";
+            StartPosition = FormStartPosition.CenterParent;
+            Size =new Size(1050, 700);
+            MinimumSize = new Size(900, 600);
+            Font = new Font("Segoe UI", 10F);
+
             _tipoMatriz.Items.AddRange(new object[] { "Gravação", "Tampa", "Laterais" }); _tipoMatriz.SelectedIndex = 0;
             _material.Items.AddRange(Enum.GetNames(typeof(MaterialMatriz))); _material.SelectedIndex = 0;
             _eixos.Items.AddRange(Enum.GetNames(typeof(QuantidadeEixos))); _eixos.SelectedIndex = 0;
@@ -73,6 +78,7 @@ namespace ProjetosCADLaser.Forms
             var layout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
+                AutoScroll=true,
                 Padding = new Padding(30),
                 ColumnCount = 2,
                 RowCount = 8

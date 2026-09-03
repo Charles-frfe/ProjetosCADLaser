@@ -92,8 +92,7 @@ namespace ProjetosCADLaser.Controls
         {
             _componentes.Items.Clear();
             _texturas.Items.Clear();
-            if (ComponentesAlterados != null)
-                ComponentesAlterados(this, EventArgs.Empty);
+           
 
             foreach (var componente in analise.Componentes)
             {
@@ -103,6 +102,11 @@ namespace ProjetosCADLaser.Controls
             foreach (var textura in analise.Texturas)
             {
                 var indice = _texturas.Items.Add(textura);
-                _texturas.SetItemChecked(indice, true); } }
+                _texturas.SetItemChecked(indice, true);
+            }
+            if (ComponentesAlterados != null)
+                ComponentesAlterados(this, EventArgs.Empty);
+        }
     }
 }
+              

@@ -21,7 +21,7 @@ namespace ProjetosCADLaser.Controls
             new FlowLayoutPanel
             {
                 AutoSize = true,
-                Dock = DockStyle.Top,
+                AutoSizeMode=AutoSizeMode.GrowAndShrink,
                 FlowDirection = FlowDirection.TopDown,
                 WrapContents = false
             };
@@ -42,7 +42,7 @@ namespace ProjetosCADLaser.Controls
             _tiposMatriz = tiposMatriz;
 
             AutoSize = true;
-            Dock = DockStyle.Top;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
             Padding = new Padding(12);
             Margin = new Padding(0, 0, 0, 12);
 
@@ -51,7 +51,7 @@ namespace ProjetosCADLaser.Controls
             var layout = new TableLayoutPanel
             {
                 AutoSize = true,
-                Dock = DockStyle.Top,
+                AutoSizeMode=AutoSizeMode.GrowAndShrink,
                 ColumnCount = 1,
                 RowCount = 4
             };
