@@ -274,7 +274,16 @@ namespace ProjetosCADLaser.Tests
 
         private static void TestarConfiguracoes()
         {
-            var raiz = CriarPastaTemporaria(); var json = new JsonService(); var local = new ConfiguracaoLocalService(json, Path.Combine(raiz, "local.json")); var configuracao = new ConfiguracaoLocal { PastaRaizDados = raiz, NomeExibido = "Operador" }; local.Salvar(configuracao); Exigir(local.Carregar().NomeExibido == "Operador", "Configuração local não voltou no round-trip."); var formatoNovo = false; try { local.Salvar(new ConfiguracaoLocal { VersaoFormato = 2 }); } catch (InvalidOperationException) { formatoNovo = true; } Exigir(formatoNovo, "Configuração local de formato mais novo foi aceita."); var compartilhada = new ConfiguracaoCompartilhadaService(json); compartilhada.Salvar(raiz, new ConfiguracaoCompartilhada()); Exigir(File.Exists(compartilhada.ObterCaminho(raiz)), "Configuração compartilhada não foi criada."); Directory.Delete(raiz, true);
+            var raiz = CriarPastaTemporaria(); var json = new JsonService(); var local = new ConfiguracaoLocalService(json, Path.Combine(raiz, "local.json"));
+            var configuracao = new ConfiguracaoLocal
+            {
+                PastaRaizDados = raiz,
+                NomeExibido = "Operador" };
+           
+            local.Salvar(configuracao);
+            Exigir(local.Carregar().NomeExibido == "Operador", "Configuração local não voltou no round-trip.");
+
+            var formatoNovo = false; try { local.Salvar(new ConfiguracaoLocal { VersaoFormato = 2 }); } catch (InvalidOperationException) { formatoNovo = true; } Exigir(formatoNovo, "Configuração local de formato mais novo foi aceita."); var compartilhada = new ConfiguracaoCompartilhadaService(json); compartilhada.Salvar(raiz, new ConfiguracaoCompartilhada()); Exigir(File.Exists(compartilhada.ObterCaminho(raiz)), "Configuração compartilhada não foi criada."); Directory.Delete(raiz, true);
         }
 
         private static void TestarLixeira()

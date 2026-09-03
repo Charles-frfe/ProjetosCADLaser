@@ -41,7 +41,8 @@ namespace ProjetosCADLaser
         UsuarioAtivo = true,
         Perfil = PerfilUsuario.Operacional
     };
-}
+                servicos.ConfiguracaoLocal.Salvar(configuracao);
+            }
 
             if (!configuracao.UsuarioAtivo)
             {

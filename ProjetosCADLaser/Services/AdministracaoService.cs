@@ -7,6 +7,74 @@ namespace ProjetosCADLaser.Services
 {
     public sealed class AdministracaoService
     {
+        public ComputadorAutorizado RegistrarOuAtualizarComputador(
+    ConfiguracaoCompartilhada configuracao,
+    ConfiguracaoLocal local)
+        {
+            if (local.IdInstalacao == Guid.Empty)
+                throw new InvalidOperationException(
+                    "A instalação local ainda não possui identificação.");
+
+            if (configuracao.ComputadoresAutorizados == null)
+                configuracao.ComputadoresAutorizados =
+                    new List<ComputadorAutorizado>();
+
+            var computador =
+                configuracao.ComputadoresAutorizados
+                    .FirstOrDefault(x =>
+                        x.IdInstalacao == local.IdInstalacao);
+
+            if (computador == null)
+            {
+                computador = new ComputadorAutorizado
+                {
+                    IdInstalacao = local.IdInstalacao,
+                    NomeComputador = Environment.MachineName,
+                    UsuarioWindows = Environment.UserName,
+                    NomeExibido = local.NomeExibido
+                        ?? Environment.UserName,
+                    Perfil = local.Perfil,
+                    Ativo = true
+                };
+
+                configuracao.ComputadoresAutorizados.Add(computador);
+            }
+            else
+            {
+                computador.NomeComputador = Environment.MachineName;
+                computador.UsuarioWindows = Environment.UserName;
+                computador.NomeExibido =
+                    local.NomeExibido ?? Environment.UserName;
+            }
+
+            return computador;
+        }
+
+        public bool EhAdministrador(
+            ConfiguracaoCompartilhada configuracao,
+            ConfiguracaoLocal local)
+        {
+            return local.IdInstalacao != Guid.Empty
+                && configuracao.IdInstalacaoAdministradora
+                    == local.IdInstalacao;
+        }
+
+        public void DefinirAdministradorInicial(
+            ConfiguracaoCompartilhada configuracao,
+            ConfiguracaoLocal local)
+        {
+            if (configuracao.IdInstalacaoAdministradora
+                != Guid.Empty)
+            {
+                throw new InvalidOperationException(
+                    "Já existe um computador administrador.");
+            }
+
+            RegistrarOuAtualizarComputador(configuracao, local);
+
+            configuracao.IdInstalacaoAdministradora =
+                local.IdInstalacao;
+        }
         private readonly PinService _pin; public AdministracaoService(PinService pin) { _pin = pin; }
         public bool ValidarPin(string valor, ConfiguracaoCompartilhada configuracao) { return configuracao.PinAdministrativo != null && _pin.Verificar(valor, configuracao.PinAdministrativo); }
         public void AlterarPin(string atual, string novo, string confirmacao, ConfiguracaoCompartilhada configuracao) { if (!ValidarPin(atual, configuracao)) throw new UnauthorizedAccessException("PIN atual incorreto."); if (novo != confirmacao) throw new ArgumentException("A confirmação do novo PIN é diferente."); configuracao.PinAdministrativo = _pin.Criar(novo); }

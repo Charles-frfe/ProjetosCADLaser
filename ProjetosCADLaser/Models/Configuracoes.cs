@@ -7,6 +7,7 @@ namespace ProjetosCADLaser.Models
     public sealed class ConfiguracaoLocal
     {
         public int VersaoFormato { get; set; }
+        public Guid IdInstalacao { get; set; }
         public string PastaRaizDados { get; set; }
         public string PastaOrigemProjetos { get; set; }
         public PreferenciaTema Tema { get; set; }
@@ -29,11 +30,39 @@ namespace ProjetosCADLaser.Models
     public sealed class ConfiguracaoCompartilhada
     {
         public int VersaoEstruturaDados { get; set; }
+        public Guid IdInstalacaoAdministradora { get; set; }
+        public List<ComputadorAutorizado> ComputadoresAutorizados { get; set; }
         public List<DefinicaoComponente> Componentes { get; set; }
         public List<ItemConfiguravel> TiposMatriz { get; set; }
         public int RetencaoLixeiraDias { get; set; }
         public CredencialPin PinAdministrativo { get; set; }
-        public ConfiguracaoCompartilhada() { VersaoEstruturaDados = 1; Componentes = Padroes.Componentes(); TiposMatriz = Padroes.TiposMatriz(); RetencaoLixeiraDias = 7; }
+        public ConfiguracaoCompartilhada() { VersaoEstruturaDados = 1; ComputadoresAutorizados = new List<ComputadorAutorizado>(); Componentes = Padroes.Componentes(); TiposMatriz = Padroes.TiposMatriz(); RetencaoLixeiraDias = 7; }
+    }
+    public sealed class ComputadorAutorizado
+    {
+        public Guid IdInstalacao { get; set; }
+
+        public string NomeComputador { get; set; }
+
+        public string UsuarioWindows { get; set; }
+
+        public string NomeExibido { get; set; }
+
+        public PerfilUsuario Perfil { get; set; }
+
+        public bool Ativo { get; set; }
+
+        public DateTimeOffset CadastradoEm { get; set; }
+
+        public ComputadorAutorizado()
+        {
+            NomeComputador = string.Empty;
+            UsuarioWindows = string.Empty;
+            NomeExibido = string.Empty;
+            Perfil = PerfilUsuario.Operacional;
+            Ativo = true;
+            CadastradoEm = DateTimeOffset.Now;
+        }
     }
     public sealed class DefinicaoComponente { public Guid Id { get; set; } public string Nome { get; set; } public List<string> Apelidos { get; set; } public bool Ativo { get; set; } public DefinicaoComponente() { Id = Guid.NewGuid(); Nome = string.Empty; Apelidos = new List<string>(); Ativo = true; } }
     public sealed class ItemConfiguravel { public Guid Id { get; set; } public string Nome { get; set; } public bool Ativo { get; set; } public ItemConfiguravel() { Id = Guid.NewGuid(); Nome = string.Empty; Ativo = true; } }
