@@ -42,7 +42,20 @@ namespace ProjetosCADLaser.Models
         public string Nome { get; set; }
         public List<string> PastasDetectadas { get; set; }
         public List<MatrizCadastro> Matrizes { get; set; }
-        public ComponenteCadastro() { Id = Guid.NewGuid(); Nome = string.Empty; PastasDetectadas = new List<string>(); Matrizes = new List<MatrizCadastro>(); }
+        public List<TexturaCadastro> Texturas { get; set; }
+        public List<AnexoCadastro> Anexos { get; set; }
+        public ComponenteCadastro()
+        {
+            Id = Guid.NewGuid();
+            Nome = string.Empty;
+
+            PastasDetectadas = new List<string>();
+
+            Matrizes = new List<MatrizCadastro>();
+            Texturas = new List<TexturaCadastro>();
+            Anexos = new List<AnexoCadastro>();
+        }
+        
     }
 
     public sealed class MatrizCadastro
