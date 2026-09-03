@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -11,7 +12,7 @@ namespace ProjetosCADLaser.Controls
         private readonly CheckedListBox _texturas = new CheckedListBox { Dock = DockStyle.Fill, Height = 80, CheckOnClick = true };
         private readonly TextBox _novoComponente = new TextBox { Width = 220 };
         private readonly Button _adicionarComponente = new Button { Text = "+Adicionar componente", AutoSize = true };
-
+        public event EventHandler ComponentesAlterados;
         public EtapaDeteccaoControl()
         {
             Dock = DockStyle.Fill; AutoSize = true;
@@ -47,6 +48,15 @@ namespace ProjetosCADLaser.Controls
 
             layout.Controls.Add(linhaAdicionar, 1, 1);
             layout.Controls.Add(new Label { Text = "Texturas confirmadas", AutoSize = true }, 0, 2);
+            _componentes.ItemCheck += delegate
+              {
+                  BeginInvoke(new Action(delegate
+                  {
+                      if (ComponentesAlterados != null)
+                          ComponentesAlterados(this, EventArgs.Empty);
+                  }));
+              };
+
             layout.Controls.Add(_texturas, 1, 2); Controls.Add(layout);
             _adicionarComponente.Click += delegate
             {
@@ -69,7 +79,8 @@ namespace ProjetosCADLaser.Controls
 
                 var indice = _componentes.Items.Add(nome);
                 _componentes.SetItemChecked(indice, true);
-
+                if (ComponentesAlterados != null)
+                    ComponentesAlterados(this, EventArgs.Empty);
                 _novoComponente.Clear();
                 _novoComponente.Focus();
             };
@@ -81,6 +92,8 @@ namespace ProjetosCADLaser.Controls
         {
             _componentes.Items.Clear();
             _texturas.Items.Clear();
+            if (ComponentesAlterados != null)
+                ComponentesAlterados(this, EventArgs.Empty);
 
             foreach (var componente in analise.Componentes)
             {

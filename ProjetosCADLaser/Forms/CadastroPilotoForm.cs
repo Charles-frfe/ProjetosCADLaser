@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using System.Drawing;
 using System.IO;
@@ -6,6 +7,7 @@ using ProjetosCADLaser.Models;
 using ProjetosCADLaser.Services;
 using ProjetosCADLaser.Controls;
 using System.Threading.Tasks;
+
 
 namespace ProjetosCADLaser.Forms
 {
@@ -40,7 +42,21 @@ namespace ProjetosCADLaser.Forms
         private readonly EtapaDeteccaoControl _etapaDeteccao = new EtapaDeteccaoControl();
         private readonly EtapaMatrizesControl _etapaMatrizes = new EtapaMatrizesControl();
         private EtapaRevisaoControl _etapaRevisao;
-        
+        private readonly FlowLayoutPanel
+            _editoresComponentes =
+            new FlowLayoutPanel
+            {
+                AutoSize = true,
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false
+            };
+        private readonly Dictionary<string,
+            ComponenteEditorControl>
+            _editorPorComponente =
+            new Dictionary<string,
+                ComponenteEditorControl>(
+                StringComparer.OrdinalIgnoreCase);
         public CadastroPilotoForm(AppServices servicos, ConfiguracaoLocal local)
         {
             InitializeComponent();
@@ -91,16 +107,19 @@ namespace ProjetosCADLaser.Forms
 
             layout.Controls.Add(_etapaDeteccao, 0, 3);
             layout.SetColumnSpan(_etapaDeteccao, 2);
+            _etapaDeteccao.ComponentesAlterados += delegate
+              { AtualizarEditoresComponentes(); };
 
             layout.Controls.Add(
-                new Label { Text = "Matriz básica", AutoSize = true },
+                new Label
+                {
+                    Text = "Matrizes",
+                    AutoSize = true
+                },
                 0,
                 4);
-
-            layout.Controls.Add(_etapaMatrizes, 1, 4);
-
-            layout.Controls.Add(_matrizResumo, 1, 5);
-
+            layout.Controls.Add(_editoresComponentes, 0, 5);
+            layout.SetColumnSpan(_editoresComponentes, 2);
             layout.Controls.Add(
                 new Label { Text = "Anexos pendentes", AutoSize = true },
                 0,
@@ -249,14 +268,67 @@ namespace ProjetosCADLaser.Forms
                 dono = _servicos.Bloqueios.CriarPorCodigo(_local.PastaRaizDados, _codigo.Text.Trim(), Guid.NewGuid(), "Cadastro", _local.NomeExibido);
                 _bloqueio = dono;
                 _heartbeat.Start();
-                var cadastro = new PilotoCadastro { Codigo = _codigo.Text.Trim(), NomeModelo = _nome.Text.Trim(), PastaOrigem = _origem.Text.Trim() };
-                foreach (var item in _etapaDeteccao.ComponentesSelecionados) cadastro.Componentes.Add(new ComponenteCadastro { Nome = item });
-                foreach (var item in _etapaDeteccao.TexturasSelecionadas) cadastro.Texturas.Add(new TexturaCadastro { Nome = item, CaminhoDetectado = Path.Combine(_origem.Text, item), CaminhoRelativo = item, Selecionada = true, Confirmada = true });
-                if (cadastro.Componentes.Count > 0)
+                var cadastro = new PilotoCadastro
                 {
-                    var matrizBase = new MatrizCadastro { Tipo = _etapaMatrizes.Tipo, Material = (MaterialMatriz)Enum.Parse(typeof(MaterialMatriz), _etapaMatrizes.Material), Eixos = (QuantidadeEixos)Enum.Parse(typeof(QuantidadeEixos), _etapaMatrizes.Eixos), Maquina = (Maquina)Enum.Parse(typeof(Maquina), _etapaMatrizes.Maquina), Acabamento = (Acabamento)Enum.Parse(typeof(Acabamento), _etapaMatrizes.Acabamento) };
-                    foreach (var textura in cadastro.Texturas) matrizBase.TexturasIds.Add(textura.Id);
-                    if (string.Equals(matrizBase.Tipo, "Laterais", StringComparison.OrdinalIgnoreCase)) cadastro.Componentes[0].Matrizes.AddRange(_servicos.Matrizes.CriarGrupoLaterais(matrizBase)); else cadastro.Componentes[0].Matrizes.Add(matrizBase);
+                    Codigo = _codigo.Text.Trim(),
+                    NomeModelo = _nome.Text.Trim(),
+                    PastaOrigem = _origem.Text.Trim()
+                };
+
+                foreach (var nomeComponente in
+                    _etapaDeteccao.ComponentesSelecionados)
+                {
+                    var componente =
+                        new ComponenteCadastro
+                        {
+                            Nome = nomeComponente
+                        };
+
+                    ComponenteEditorControl editor;
+
+                    if (_editorPorComponente.TryGetValue(
+                        nomeComponente,
+                        out editor))
+                    {
+                        foreach (var matriz in editor.Matrizes)
+                        {
+                            if (string.Equals(
+                                matriz.Tipo,
+                                "Laterais",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                componente.Matrizes.AddRange(
+                                    _servicos.Matrizes.CriarGrupoLaterais(
+                                        matriz));
+                            }
+                            else
+                            {
+                                componente.Matrizes.Add(matriz);
+                            }
+                        }
+                    }
+
+                    cadastro.Componentes.Add(componente);
+                }
+
+                // Temporário:
+                // ainda mantemos as texturas no nível geral
+                // para não quebrar a estrutura antiga.
+                // Na próxima etapa elas serão distribuídas
+                // para cada componente.
+                foreach (var item in
+                    _etapaDeteccao.TexturasSelecionadas)
+                {
+                    cadastro.Texturas.Add(
+                        new TexturaCadastro
+                        {
+                            Nome = item,
+                            CaminhoDetectado =
+                                Path.Combine(_origem.Text, item),
+                            CaminhoRelativo = item,
+                            Selecionada = true,
+                            Confirmada = true
+                        });
                 }
                 var salvo = _servicos.CadastroPiloto.Salvar(_local.PastaRaizDados, cadastro, _etapaRevisao.Pendentes, new[] { "Gravação", "Tampa", "Laterais" });
                 _status.ForeColor = Color.SeaGreen; _status.Text = "Cadastro salvo: " + salvo.Codigo; DialogResult = DialogResult.OK;
@@ -280,7 +352,49 @@ namespace ProjetosCADLaser.Forms
             }
             catch (Exception ex) when (ex is DirectoryNotFoundException || ex is IOException) { _status.ForeColor = Color.Firebrick; _status.Text = ex.Message; }
         }
+        private void AtualizarEditoresComponentes()
+        {
+            var selecionados =
+                new HashSet<string>(
+                    _etapaDeteccao.ComponentesSelecionados,
+                    StringComparer.OrdinalIgnoreCase);
 
+            foreach (var nome in selecionados)
+            {
+                ComponenteEditorControl editor;
+
+                if (!_editorPorComponente.TryGetValue(
+                    nome,
+                    out editor))
+                {
+                    editor =
+                        new ComponenteEditorControl(nome);
+
+                    _editorPorComponente.Add(
+                        nome,
+                        editor);
+                }
+            }
+
+            _editoresComponentes.SuspendLayout();
+
+            _editoresComponentes.Controls.Clear();
+
+            foreach (var nome in
+                _etapaDeteccao.ComponentesSelecionados)
+            {
+                ComponenteEditorControl editor;
+
+                if (_editorPorComponente.TryGetValue(
+                    nome,
+                    out editor))
+                {
+                    _editoresComponentes.Controls.Add(editor);
+                }
+            }
+
+            _editoresComponentes.ResumeLayout();
+        }
         private void AdicionarAnexo() { using (var dialogo = new OpenFileDialog { Multiselect = false, Title = "Selecionar anexo" }) if (dialogo.ShowDialog(this) == DialogResult.OK) try { var pendente = _servicos.Anexos.AdicionarArquivo(_sessaoAnexos, dialogo.FileName, false); _pendentes.Add(pendente); _anexos.Items.Add(pendente.NomeOriginal); } catch (IOException ex) { _status.ForeColor = Color.Firebrick; _status.Text = ex.Message; } }
         private void CarregarEdicaoAnexo() { if (_anexos.SelectedIndex < 0 || _anexos.SelectedIndex >= _pendentes.Count) return; var pendente = _pendentes[_anexos.SelectedIndex]; _tituloAnexo.Text = pendente.Titulo; _categoriaAnexo.Text = pendente.Categoria; }
         private void AplicarEdicaoAnexo() { if (_anexos.SelectedIndex < 0 || _anexos.SelectedIndex >= _pendentes.Count) return; var pendente = _pendentes[_anexos.SelectedIndex]; pendente.Titulo = _tituloAnexo.Text.Trim(); pendente.Categoria = _categoriaAnexo.Text.Trim(); _status.ForeColor = Color.SeaGreen; _status.Text = "Edição do anexo aplicada à sessão temporária."; }
