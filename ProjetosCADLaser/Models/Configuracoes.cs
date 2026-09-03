@@ -14,7 +14,17 @@ namespace ProjetosCADLaser.Models
         public string NomeExibido { get; set; }
         public bool UsuarioAtivo { get; set; }
         public Dictionary<string, string> PreferenciasInterface { get; set; }
-        public ConfiguracaoLocal() { VersaoFormato = 1; Tema = PreferenciaTema.SeguirWindows; Perfil = PerfilUsuario.Operacional; UsuarioAtivo = true; PreferenciasInterface = new Dictionary<string, string>(); }
+        public ConfiguracaoLocal()
+        {
+            VersaoFormato = 1;
+
+            PastaOrigemProjetos =
+
+                @"\\Clfssrvfar\gr2\CAD_Textura\Projetos_Em_Andamento\PILOTO";
+            Tema = PreferenciaTema.SeguirWindows;
+            Perfil = PerfilUsuario.Operacional;
+            UsuarioAtivo = true;
+            PreferenciasInterface = new Dictionary<string, string>(); }
     }
     public sealed class ConfiguracaoCompartilhada
     {

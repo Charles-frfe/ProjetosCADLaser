@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using ProjetosCADLaser.Models;
 using ProjetosCADLaser.Services;
 using ProjetosCADLaser.Controls;
+using System.Threading.Tasks;
 
 namespace ProjetosCADLaser.Forms
 {
@@ -35,10 +36,11 @@ namespace ProjetosCADLaser.Forms
         private readonly Timer _heartbeat = new Timer { Interval = 30000 };
         private readonly AnalisadorPastasService _analisador = new AnalisadorPastasService();
         private readonly Button _analisar = new Button { Text = "Analisar pasta", AutoSize = true };
+        private System.Threading.CancellationTokenSource _pesquisaOrigemCts;
         private readonly EtapaDeteccaoControl _etapaDeteccao = new EtapaDeteccaoControl();
         private readonly EtapaMatrizesControl _etapaMatrizes = new EtapaMatrizesControl();
         private EtapaRevisaoControl _etapaRevisao;
-
+        
         public CadastroPilotoForm(AppServices servicos, ConfiguracaoLocal local)
         {
             InitializeComponent();
@@ -52,21 +54,190 @@ namespace ProjetosCADLaser.Forms
             _eixos.Items.AddRange(Enum.GetNames(typeof(QuantidadeEixos))); _eixos.SelectedIndex = 0;
             _maquina.Items.AddRange(Enum.GetNames(typeof(Maquina))); _maquina.SelectedIndex = 0;
             _acabamento.Items.AddRange(Enum.GetNames(typeof(Acabamento))); _acabamento.SelectedIndex = 0;
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(30), ColumnCount = 2, RowCount = 11 };
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize)); layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            layout.Controls.Add(new Label { Text = "Código do modelo", AutoSize = true }, 0, 0); layout.Controls.Add(_codigo, 1, 0);
-            layout.Controls.Add(new Label { Text = "Nome do modelo", AutoSize = true }, 0, 1); layout.Controls.Add(_nome, 1, 1);
-            layout.Controls.Add(new Label { Text = "Pasta de origem", AutoSize = true }, 0, 2);
-            var etapaOrigem = new EtapaOrigemControl(); etapaOrigem.AnalisarSolicitado += delegate { _origem.Text = etapaOrigem.Pasta; AnalisarPasta(); }; layout.Controls.Add(etapaOrigem, 1, 2);
-            layout.Controls.Add(new Label { Text = "A análise lê somente nomes de pastas; o cadastro básico ainda será salvo sem anexos, componentes ou matrizes.", AutoSize = true, ForeColor = Color.DimGray }, 0, 3); layout.SetColumnSpan(layout.GetControlFromPosition(0, 3), 2);
-            layout.Controls.Add(_status, 0, 4); layout.SetColumnSpan(_status, 2);
-            layout.Controls.Add(_etapaDeteccao, 0, 5); layout.SetColumnSpan(_etapaDeteccao, 2);
-            layout.Controls.Add(new Label { Text = "Matriz básica", AutoSize = true }, 0, 8); layout.Controls.Add(_etapaMatrizes, 1, 8);
-            layout.Controls.Add(_matrizResumo, 1, 9);
-            layout.Controls.Add(new Label { Text = "Anexos pendentes", AutoSize = true }, 0, 10); layout.Controls.Add(_etapaRevisao, 1, 10); _etapaMatrizes.ConfiguracaoAlterada += delegate { AtualizarResumoMatriz(); };
-            var salvar = new Button { Text = "Salvar cadastro", AutoSize = true, Height = 38 }; salvar.Click += delegate { Salvar(); }; var cancelar = new Button { Text = "Cancelar", AutoSize = true, Height = 38 }; cancelar.Click += delegate { Close(); };
-            var selecionarAnexo = new Button { Text = "Adicionar anexo", AutoSize = true, Visible = false }; var removerAnexo = new Button { Text = "Remover anexo", AutoSize = true, Visible = false };
-            var botoes = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Fill }; botoes.Controls.Add(cancelar); botoes.Controls.Add(salvar); layout.Controls.Add(botoes, 0, 12); layout.SetColumnSpan(botoes, 2); Controls.Add(layout); _tipoMatriz.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); }; _material.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); }; _eixos.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); }; _maquina.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); }; _acabamento.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); }; AtualizarResumoMatriz(); _servicos.Tema.Aplicar(this);
+            var layout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(30),
+                ColumnCount = 2,
+                RowCount = 8
+            };
+
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+            layout.Controls.Add(
+                new Label { Text = "Código do modelo", AutoSize = true },
+                0,
+                0);
+
+            layout.Controls.Add(_codigo, 1, 0);
+
+            _codigo.Leave += async delegate
+            {
+                await LocalizarPilotoAutomaticamente();
+            };
+
+            layout.Controls.Add(
+                new Label { Text = "Nome do modelo", AutoSize = true },
+                0,
+                1);
+
+            layout.Controls.Add(_nome, 1, 1);
+
+            // Mantemos somente para erros e avisos.
+            // Quando tudo der certo, ficará vazio.
+            layout.Controls.Add(_status, 0, 2);
+            layout.SetColumnSpan(_status, 2);
+
+            layout.Controls.Add(_etapaDeteccao, 0, 3);
+            layout.SetColumnSpan(_etapaDeteccao, 2);
+
+            layout.Controls.Add(
+                new Label { Text = "Matriz básica", AutoSize = true },
+                0,
+                4);
+
+            layout.Controls.Add(_etapaMatrizes, 1, 4);
+
+            layout.Controls.Add(_matrizResumo, 1, 5);
+
+            layout.Controls.Add(
+                new Label { Text = "Anexos pendentes", AutoSize = true },
+                0,
+                6);
+
+            layout.Controls.Add(_etapaRevisao, 1, 6);
+
+            _etapaMatrizes.ConfiguracaoAlterada += delegate
+            {
+                AtualizarResumoMatriz();
+            };
+
+            var salvar = new Button
+            {
+                Text = "Salvar cadastro",
+                AutoSize = true,
+                Height = 38
+            };
+
+            salvar.Click += delegate
+            {
+                Salvar();
+            };
+
+            var cancelar = new Button
+            {
+                Text = "Cancelar",
+                AutoSize = true,
+                Height = 38
+            };
+
+            cancelar.Click += delegate
+            {
+                Close();
+            };
+
+            var botoes = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                FlowDirection = FlowDirection.RightToLeft,
+                Dock = DockStyle.Fill
+            };
+
+            botoes.Controls.Add(cancelar);
+            botoes.Controls.Add(salvar);
+
+            layout.Controls.Add(botoes, 0, 7);
+            layout.SetColumnSpan(botoes, 2);
+
+            Controls.Add(layout);
+            _tipoMatriz.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); };
+            _material.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); };
+            _eixos.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); };
+            _maquina.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); };
+            _acabamento.SelectedIndexChanged += delegate { AtualizarResumoMatriz(); }; AtualizarResumoMatriz();
+            _servicos.Tema.Aplicar(this);
+        }
+
+        private async Task LocalizarPilotoAutomaticamente()
+        {
+            var codigo = _codigo.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(codigo))
+                return;
+
+            if
+                (string.IsNullOrWhiteSpace(_local.PastaOrigemProjetos
+                ))
+            {
+                _status.ForeColor = Color.Firebrick;
+                _status.Text = "A pasta-base das pilotos não está configurada.";
+                return;
+            }
+
+            if (_pesquisaOrigemCts != null)
+            {
+                _pesquisaOrigemCts.Cancel();
+                _pesquisaOrigemCts.Dispose();
+            }
+
+            _pesquisaOrigemCts = new
+            System.Threading.CancellationTokenSource();
+
+            try
+            {
+                _status.ForeColor = Color.DimGray;
+                _status.Text = "Procurando piloto" + codigo + "...";
+
+                var resultado =
+                    await
+                    _servicos.PesquisaPastaOrigem.PesquisarAsync(
+                        _local.PastaOrigemProjetos,
+                        codigo,
+                        _pesquisaOrigemCts.Token);
+
+                if (!resultado.RaizDisponivel)
+                {
+                    _status.ForeColor = Color.Firebrick;
+                    _status.Text = "A pasta de pilotos está indisponível.";
+                    return;
+                }
+                if (resultado.PastasEncontradas.Count == 0)
+                {
+                    _status.ForeColor = Color.DarkOrange;
+                    _status.Text = "Foram encontradas" +
+                    resultado.PastasEncontradas.Count +
+                    "pastas para este código. Selecione a pasta manualmente.";
+                    return;
+                }
+
+                var pastaEncontrada =
+                    resultado.PastasEncontradas[0];
+
+                _origem.Text = pastaEncontrada;
+
+                var identificacao =
+                AnalisadorPastasService.IdentificarRaiz(
+                    new DirectoryInfo(pastaEncontrada).Name);
+
+                if (string.IsNullOrWhiteSpace(_nome.Text))
+                    _nome.Text = identificacao.NomeModelo;
+
+                AnalisarPasta();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (IOException ex)
+            {
+                _status.ForeColor = Color.Firebrick;
+                _status.Text = ex.Message;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                _status.ForeColor = Color.Firebrick;
+                _status.Text = "Sem permissão para acessar a pasta pilotos";
+            }
         }
 
         private void Salvar()
@@ -105,7 +276,7 @@ namespace ProjetosCADLaser.Forms
                 _etapaDeteccao.AplicarAnalise(analise);
                 if (string.IsNullOrWhiteSpace(_codigo.Text)) _codigo.Text = analise.CodigoSugerido;
                 if (string.IsNullOrWhiteSpace(_nome.Text)) _nome.Text = analise.NomeModeloSugerido;
-                _status.ForeColor = Color.SeaGreen; _status.Text = "Análise concluída: " + analise.Componentes.Count + " componente(s), " + analise.Texturas.Count + " textura(s), " + analise.NaoClassificadas.Count + " não classificada(s).";
+                _status.Text = string.Empty;
             }
             catch (Exception ex) when (ex is DirectoryNotFoundException || ex is IOException) { _status.ForeColor = Color.Firebrick; _status.Text = ex.Message; }
         }
