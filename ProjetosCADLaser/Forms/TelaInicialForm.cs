@@ -15,7 +15,6 @@ namespace ProjetosCADLaser.Forms
         private readonly Button _cadastrar = CriarBotao("Cadastrar");
         private readonly Button _testeTextura = CriarBotao("Teste de textura");
         private readonly Button _pesquisar = CriarBotao("Pesquisar");
-        private readonly Button _lixeira = CriarBotao("Lixeira administrativa");
         private readonly Button _sair = CriarBotao("Sair");
         private readonly Label _aviso = new Label { AutoSize = true, TextAlign = ContentAlignment.MiddleCenter };
         private readonly Button _testarNovamente = new Button { Text = "Testar novamente", AutoSize = true, Visible = false };
@@ -172,7 +171,6 @@ namespace ProjetosCADLaser.Forms
                 _gradeAcoes.Controls.Add(_cadastrar, 0, 0);
                 _gradeAcoes.Controls.Add(_pesquisar, 1, 0);
                 _gradeAcoes.Controls.Add(_testeTextura, 0, 1);
-                _gradeAcoes.Controls.Add(_lixeira, 1, 1);
             }
             else
             {
@@ -254,7 +252,6 @@ namespace ProjetosCADLaser.Forms
             _cadastrar.Click += delegate { AbrirCadastro(); };
             _testeTextura.Click += delegate { AbrirTesteTextura(); };
             _pesquisar.Click += delegate { AbrirPesquisa(); };
-            _lixeira.Click += delegate { AbrirLixeira(); };
             _sair.Click += delegate { Close(); };
             _testarNovamente.Click += delegate { AtualizarDisponibilidade(); };
         }
@@ -314,21 +311,11 @@ namespace ProjetosCADLaser.Forms
             using (var form = new TesteTexturaForm(_servicos, _local)) form.ShowDialog(this);
         }
 
-        private void AbrirLixeira()
-        {
-            if (!_lixeira.Enabled)
-            {
-                MostrarIndisponibilidade("Lixeira administrativa");
-                return;
-            }
-
-            using (var form = new LixeiraForm(_servicos, _local)) form.ShowDialog(this);
-        }
-
+       
         private void AtualizarDisponibilidade()
         {
             var resultado = _servicos.Inicializacao.VerificarDisponibilidade(_local);
-            _cadastrar.Enabled = _testeTextura.Enabled = _pesquisar.Enabled = _lixeira.Enabled = resultado.Sucesso;
+            _cadastrar.Enabled = _testeTextura.Enabled = _pesquisar.Enabled = resultado.Sucesso;
             _aviso.Text = resultado.Sucesso ? "" : "Pasta de dados indisponível.\n" + resultado.Mensagem;
             _aviso.ForeColor = resultado.Sucesso ? _servicos.Tema.Paleta.TextoSecundario : _servicos.Tema.Paleta.Perigo;
             _testarNovamente.Visible = !resultado.Sucesso;
