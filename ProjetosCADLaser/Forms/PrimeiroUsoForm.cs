@@ -79,7 +79,11 @@ namespace ProjetosCADLaser.Forms
             if (_pin.Text != _confirmacao.Text) { MostrarErro("A confirmação do PIN é diferente."); return; }
             if (MessageBox.Show(this, "A estrutura de dados será criada dentro da pasta selecionada. Deseja continuar?", "Confirmar configuração", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             try { _servicos.Inicializacao.ConcluirPrimeiroUso(_pasta.Text, _pin.Text, _confirmacao.Text, Apresentacao.Tema(_tema.Text)); DialogResult = DialogResult.OK; Close(); }
-            catch (Exception ex) when (ex is ArgumentException || ex is IOException || ex is UnauthorizedAccessException) { _servicos.Log.Registrar(ex, "Falha no primeiro uso", _pasta.Text); MostrarErro(ex.Message); }
+            catch (Exception ex) when (
+            ex is ArgumentException || 
+            ex is IOException || 
+            ex is UnauthorizedAccessException ||
+            ex is InvalidOperationException) { _servicos.Log.Registrar(ex, "Falha no primeiro uso", _pasta.Text); MostrarErro(ex.Message); }
         }
 
         private void MostrarErro(string mensagem) { MessageBox.Show(this, mensagem, "Não foi possível concluir", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
