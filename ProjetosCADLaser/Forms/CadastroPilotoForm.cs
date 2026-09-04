@@ -355,7 +355,13 @@ namespace ProjetosCADLaser.Forms
                         }
                     }
                 }
-                var salvo = _servicos.CadastroPiloto.Salvar(_local.PastaRaizDados, cadastro, _etapaRevisao.Pendentes, new[] { "Gravação", "Tampa", "Laterais" });
+                var salvo = _servicos.CadastroPiloto.Salvar(
+                    _local.PastaRaizDados,
+                    cadastro,
+                    _etapaRevisao.Pendentes,
+                    new[] { "Gravação", "Tampa", "Laterais" },
+                    _observacoes.Observacoes);
+
                 _status.ForeColor = Color.SeaGreen; _status.Text = "Cadastro salvo: " + salvo.Codigo; DialogResult = DialogResult.OK;
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidDataException || ex is InvalidOperationException || ex is IOException) { _servicos.Log.Registrar(ex, "Falha no cadastro básico", _local.PastaRaizDados); _status.ForeColor = Color.Firebrick; _status.Text = ex.Message; }

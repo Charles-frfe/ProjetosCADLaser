@@ -18,8 +18,14 @@ namespace ProjetosCADLaser.Services
             var erros = new List<string>(); try { ValidarCodigo(cadastro.Codigo); } catch (ArgumentException ex) { erros.Add(ex.Message); } if (string.IsNullOrWhiteSpace(cadastro.NomeModelo)) erros.Add("Informe o nome do modelo."); if (!Directory.Exists(cadastro.PastaOrigem)) erros.Add("A pasta de origem não foi encontrada."); var componentes = new HashSet<string>(StringComparer.Ordinal);
             foreach (var componente in cadastro.Componentes) { if (!componentes.Add(NormalizadorPesquisa.Normalizar(componente.Nome))) erros.Add("O componente " + componente.Nome + " está duplicado."); foreach (var matriz in componente.Matrizes) erros.AddRange(_matrizes.Validar(matriz, tiposAtivos).Select(x => componente.Nome + ": " + x)); } return erros;
         }
-        public PilotoCadastro Salvar(string raizDados, PilotoCadastro cadastro, IReadOnlyCollection<AnexoPendente> anexosPendentes, IEnumerable<string> tiposAtivos,
-            IReadOnlyCollection<ObservacaoPendente>observacaoPendentes=null)
+        public PilotoCadastro Salvar(
+            string raizDados,
+            PilotoCadastro cadastro,
+            IReadOnlyCollection<AnexoPendente>
+            anexosPendentes,
+            IEnumerable<string> tiposAtivos,
+            IReadOnlyCollection<ObservacaoPendente>
+            observacoesPendentes=null)
         {
             var acesso = _acesso.Testar(raizDados); if (!acesso.Sucesso) throw new IOException(acesso.Mensagem); var erros = Validar(cadastro, tiposAtivos); if (erros.Count > 0) throw new InvalidDataException(string.Join(Environment.NewLine, erros)); if (CodigoExiste(raizDados, cadastro.Codigo)) throw new InvalidOperationException("Já existe um cadastro com esse código.");
             var pastaCadastro = Path.Combine(raizDados, "Cadastros", ValidarCodigo(cadastro.Codigo)); var criada = false;
