@@ -88,7 +88,7 @@ namespace ProjetosCADLaser.Forms
                 AutoScroll=true,
                 Padding = new Padding(30),
                 ColumnCount = 2,
-                RowCount = 9
+                RowCount = 8
             };
 
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -137,12 +137,6 @@ namespace ProjetosCADLaser.Forms
                 _observacoes, 0, 6);
             layout.SetColumnSpan(
                 _observacoes, 2);
-            layout.Controls.Add(
-                new Label { Text = "Anexos pendentes", AutoSize = true },
-                0,
-                7);
-
-            layout.Controls.Add(_etapaRevisao, 1, 7);
 
             _etapaMatrizes.ConfiguracaoAlterada += delegate
             {
@@ -183,7 +177,7 @@ namespace ProjetosCADLaser.Forms
             botoes.Controls.Add(cancelar);
             botoes.Controls.Add(salvar);
 
-            layout.Controls.Add(botoes, 0, 8);
+            layout.Controls.Add(botoes, 0, 7);
             layout.SetColumnSpan(botoes, 2);
 
             Controls.Add(layout);
