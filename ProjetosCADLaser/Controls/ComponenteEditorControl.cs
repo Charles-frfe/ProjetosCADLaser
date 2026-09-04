@@ -43,6 +43,9 @@ namespace ProjetosCADLaser.Controls
         private readonly List<MatrizCadastro>
             _matrizesAdicionadas =
                 new List<MatrizCadastro>();
+        private readonly List<TexturaCadastro>
+            _texturasDoComponente =
+            new List<TexturaCadastro>();
 
         public ComponenteEditorControl(
             string nome,
@@ -136,7 +139,10 @@ namespace ProjetosCADLaser.Controls
         {
             get { return _matrizesAdicionadas; }
         }
-
+        public IEnumerable<TexturaCadastro> Texturas
+        {
+            get { return _texturasDoComponente; }
+        }
         private void AdicionarMatriz()
         {
             MatrizCadastro matriz;
@@ -149,7 +155,43 @@ namespace ProjetosCADLaser.Controls
                 _mensagem.Text = erro;
                 return;
             }
+            foreach (var nomeTextura in
+    _novaMatriz.TexturasSelecionadas)
+            {
+                TexturaCadastro textura = null;
 
+                foreach (var existente in
+                    _texturasDoComponente)
+                {
+                    if (string.Equals(
+                        existente.Nome,
+                        nomeTextura,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        textura = existente;
+                        break;
+                    }
+                }
+
+                if (textura == null)
+                {
+                    textura =
+                        new TexturaCadastro
+                        {
+                            Nome = nomeTextura
+                        };
+
+                    _texturasDoComponente.Add(
+                        textura);
+                }
+
+                if (!matriz.TexturasIds.Contains(
+                    textura.Id))
+                {
+                    matriz.TexturasIds.Add(
+                        textura.Id);
+                }
+            }
             _matrizesAdicionadas.Add(matriz);
 
             _novaMatriz.Limpar();
@@ -211,7 +253,31 @@ namespace ProjetosCADLaser.Controls
                     TextoMaquina(matriz.Maquina) +
                     " | " +
                     TextoAcabamento(matriz.Acabamento);
+                var nomesTexturas =
+                    new List<string>();
 
+                foreach(var texturaId in
+                    matriz.TexturasIds)
+                {
+                    foreach (var textura in
+                        _texturasDoComponente)
+                    {
+                        if (textura.Id==texturaId)
+                        {
+                            nomesTexturas.Add(
+                                textura.Nome);
+
+                            break;
+                        }
+                    }
+                }
+
+                texto +=
+                    Environment.NewLine +
+                    "Texturas:" +
+                    (nomesTexturas.Count > 0
+                    ? string.Join(",", nomesTexturas)
+                    : "nenhuma");
                 linha.Controls.Add(
                     new Label
                     {

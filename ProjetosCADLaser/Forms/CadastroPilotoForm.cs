@@ -296,6 +296,10 @@ namespace ProjetosCADLaser.Forms
                         nomeComponente,
                         out editor))
                     {
+                        foreach (var textura in editor.Texturas)
+                        {
+                            componente.Texturas.Add(textura);
+                        }
                         foreach (var matriz in editor.Matrizes)
                         {
                             if (string.Equals(
@@ -322,19 +326,23 @@ namespace ProjetosCADLaser.Forms
                 // para não quebrar a estrutura antiga.
                 // Na próxima etapa elas serão distribuídas
                 // para cada componente.
-                foreach (var item in
-                    _etapaDeteccao.TexturasSelecionadas)
+                // Mantém também no nível geral
+                // para compatibilidade com cadastros antigos.
+                // A relação real fica:
+                // componente -> matriz-> TexturasIds.
+                foreach (var componente in
+                    cadastro.Componentes)
                 {
-                    cadastro.Texturas.Add(
-                        new TexturaCadastro
+                    foreach (var textura in
+                        componente.Texturas)
+                    {
+                        if(!cadastro.Texturas.Exists(
+                            x=>x.Id==textura.Id))
                         {
-                            Nome = item,
-                            CaminhoDetectado =
-                                Path.Combine(_origem.Text, item),
-                            CaminhoRelativo = item,
-                            Selecionada = true,
-                            Confirmada = true
-                        });
+                            cadastro.Texturas.Add(
+                                textura);
+                        }
+                    }
                 }
                 var salvo = _servicos.CadastroPiloto.Salvar(_local.PastaRaizDados, cadastro, _etapaRevisao.Pendentes, new[] { "Gravação", "Tampa", "Laterais" });
                 _status.ForeColor = Color.SeaGreen; _status.Text = "Cadastro salvo: " + salvo.Codigo; DialogResult = DialogResult.OK;

@@ -45,7 +45,7 @@ namespace ProjetosCADLaser.Controls
                 },
                 0,
                 1);
-
+            layout.Controls.Add(linhaAdicionar, 1, 1);
             
             _componentes.ItemCheck += delegate
               {
