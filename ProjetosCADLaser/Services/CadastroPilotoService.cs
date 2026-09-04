@@ -18,7 +18,8 @@ namespace ProjetosCADLaser.Services
             var erros = new List<string>(); try { ValidarCodigo(cadastro.Codigo); } catch (ArgumentException ex) { erros.Add(ex.Message); } if (string.IsNullOrWhiteSpace(cadastro.NomeModelo)) erros.Add("Informe o nome do modelo."); if (!Directory.Exists(cadastro.PastaOrigem)) erros.Add("A pasta de origem não foi encontrada."); var componentes = new HashSet<string>(StringComparer.Ordinal);
             foreach (var componente in cadastro.Componentes) { if (!componentes.Add(NormalizadorPesquisa.Normalizar(componente.Nome))) erros.Add("O componente " + componente.Nome + " está duplicado."); foreach (var matriz in componente.Matrizes) erros.AddRange(_matrizes.Validar(matriz, tiposAtivos).Select(x => componente.Nome + ": " + x)); } return erros;
         }
-        public PilotoCadastro Salvar(string raizDados, PilotoCadastro cadastro, IReadOnlyCollection<AnexoPendente> anexosPendentes, IEnumerable<string> tiposAtivos)
+        public PilotoCadastro Salvar(string raizDados, PilotoCadastro cadastro, IReadOnlyCollection<AnexoPendente> anexosPendentes, IEnumerable<string> tiposAtivos,
+            IReadOnlyCollection<ObservacaoPendente>observacaoPendentes=null)
         {
             var acesso = _acesso.Testar(raizDados); if (!acesso.Sucesso) throw new IOException(acesso.Mensagem); var erros = Validar(cadastro, tiposAtivos); if (erros.Count > 0) throw new InvalidDataException(string.Join(Environment.NewLine, erros)); if (CodigoExiste(raizDados, cadastro.Codigo)) throw new InvalidOperationException("Já existe um cadastro com esse código.");
             var pastaCadastro = Path.Combine(raizDados, "Cadastros", ValidarCodigo(cadastro.Codigo)); var criada = false;
@@ -26,7 +27,64 @@ namespace ProjetosCADLaser.Services
             {
                 Directory.CreateDirectory(pastaCadastro); criada = true; foreach (var pasta in new[] { "imagens", "arquivos", "backups", "bloqueio" }) Directory.CreateDirectory(Path.Combine(pastaCadastro, pasta)); cadastro.Id = cadastro.Id == Guid.Empty ? Guid.NewGuid() : cadastro.Id; cadastro.Status = StatusPiloto.Ativa; cadastro.CriadoEm = cadastro.UltimaEdicaoEm = DateTimeOffset.Now; cadastro.CriadoPor = cadastro.UltimaEdicaoPor = Environment.UserName; cadastro.Computador = Environment.MachineName;
                 var evento = new EventoCadastro { Tipo = TipoEvento.CriacaoPiloto, Observacao = "Cadastro inicial da piloto.", EstadoInicialResumo = cadastro.Componentes.Count + " componente(s), " + cadastro.Componentes.Sum(x => x.Matrizes.Count) + " matriz(es) e " + cadastro.Texturas.Count + " textura(s)." };
-                foreach (var pendente in anexosPendentes) { var anexo = _anexos.CopiarParaCadastro(pendente, pastaCadastro, evento.Id); cadastro.Anexos.Add(anexo); if (pendente.Imagem) evento.Imagens.Add(anexo); else evento.Anexos.Add(anexo); } cadastro.Historico.Add(evento); _repositorio.Salvar(raizDados, cadastro); var relido = _repositorio.Carregar(raizDados, cadastro.Codigo); if (relido.Id != cadastro.Id || relido.Codigo != cadastro.Codigo) throw new InvalidDataException("O cadastro salvo não passou pela validação final."); return relido;
+                foreach (var pendente in anexosPendentes) { var anexo = _anexos.CopiarParaCadastro(pendente, pastaCadastro, evento.Id); cadastro.Anexos.Add(anexo); if (pendente.Imagem) evento.Imagens.Add(anexo); else evento.Anexos.Add(anexo); }
+                cadastro.Historico.Add(evento);
+                if (observacoesPendentes != null)
+                {
+                    foreach (var observacao in
+                        observacoesPendentes)
+                    {
+                        if (string.IsNullOrWhiteSpace(
+                            observacao.Texto))
+                            continue;
+
+                        var eventoObservacao =
+                            new EventoCadastro
+                            {
+                                Tipo =
+                                    TipoEvento.ObservacaoGeral,
+
+                                Observacao =
+                                    observacao.Texto,
+
+                                ComponenteId =
+                                    observacao.ComponenteId,
+
+                                MatrizId =
+                                    observacao.MatrizId
+                            };
+
+                        foreach (var pendente in
+                            observacao.Anexos)
+                        {
+                            var anexo =
+                                _anexos.CopiarParaCadastro(
+                                    pendente,
+                                    pastaCadastro,
+                                    eventoObservacao.Id);
+
+                            cadastro.Anexos.Add(anexo);
+
+                            if (pendente.Imagem)
+                            {
+                                eventoObservacao.Imagens.Add(
+                                    anexo);
+                            }
+                            else
+                            {
+                                eventoObservacao.Anexos.Add(
+                                    anexo);
+                            }
+                        }
+
+                        cadastro.Historico.Add(
+                            eventoObservacao);
+                    }
+                }
+                _repositorio.Salvar(raizDados, cadastro);
+
+
+                var relido = _repositorio.Carregar(raizDados, cadastro.Codigo); if (relido.Id != cadastro.Id || relido.Codigo != cadastro.Codigo) throw new InvalidDataException("O cadastro salvo não passou pela validação final."); return relido;
             }
             catch { if (criada && Directory.Exists(pastaCadastro)) Directory.Delete(pastaCadastro, true); throw; }
         }
