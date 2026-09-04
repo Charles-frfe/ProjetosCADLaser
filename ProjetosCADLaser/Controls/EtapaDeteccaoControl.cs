@@ -20,7 +20,7 @@ namespace ProjetosCADLaser.Controls
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
-                RowCount = 3,
+                RowCount = 2,
                 AutoSize = true
             };
 
@@ -46,8 +46,7 @@ namespace ProjetosCADLaser.Controls
                 0,
                 1);
 
-            layout.Controls.Add(linhaAdicionar, 1, 1);
-            layout.Controls.Add(new Label { Text = "Texturas confirmadas", AutoSize = true }, 0, 2);
+            
             _componentes.ItemCheck += delegate
               {
                   BeginInvoke(new Action(delegate
@@ -57,7 +56,7 @@ namespace ProjetosCADLaser.Controls
                   }));
               };
 
-            layout.Controls.Add(_texturas, 1, 2); Controls.Add(layout);
+            Controls.Add(layout);
             _adicionarComponente.Click += delegate
             {
                 var nome = _novoComponente.Text.Trim();

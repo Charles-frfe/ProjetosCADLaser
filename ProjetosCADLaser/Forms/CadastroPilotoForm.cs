@@ -374,7 +374,7 @@ namespace ProjetosCADLaser.Forms
                     out editor))
                 {
                     editor =
-                        new ComponenteEditorControl(nome);
+                        new ComponenteEditorControl(nome,null,_etapaDeteccao.TexturasSelecionadas);
 
                     _editorPorComponente.Add(
                         nome,
@@ -392,7 +392,7 @@ namespace ProjetosCADLaser.Forms
                 ComponenteEditorControl editor;
 
                 if (_editorPorComponente.TryGetValue(nome,out editor))
-                { editor.DefinirTexturasDisponiveis(_etapaDeteccao.TexturasSelecionadas);
+                { 
                     _editoresComponentes.Controls.Add(editor);
                 }
             }

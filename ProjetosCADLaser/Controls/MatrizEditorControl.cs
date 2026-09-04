@@ -43,7 +43,8 @@ namespace ProjetosCADLaser.Controls
             };
 
         public MatrizEditorControl(
-            IEnumerable<string> tiposMatriz = null)
+            IEnumerable<string> tiposMatriz = null,
+            IEnumerable<string>texturasDisponiveis=null)
         {
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -89,7 +90,7 @@ namespace ProjetosCADLaser.Controls
                     "Fosco",
                     "Polido"
                 });
-
+            DefinirTexturasDisponiveis(texturasDisponiveis);
             Limpar();
 
             var layout =
@@ -99,7 +100,7 @@ namespace ProjetosCADLaser.Controls
                     AutoSizeMode =
                         AutoSizeMode.GrowAndShrink,
                     ColumnCount = 5,
-                    RowCount = 2
+                    RowCount = 4
                 };
 
             layout.Controls.Add(
@@ -152,10 +153,43 @@ namespace ProjetosCADLaser.Controls
             layout.Controls.Add(_eixos, 2, 1);
             layout.Controls.Add(_maquina, 3, 1);
             layout.Controls.Add(_acabamento, 4, 1);
+            layout.Controls.Add(new Label
+            {
+                Text = "Texturas da matriz",
+                AutoSize = true,
+                Margin = new Padding(0, 10, 0, 4)
+            }, 0, 2);
+            layout.SetColumnSpan(layout.GetControlFromPosition(0, 2), 5);
+            layout.Controls.Add(_texturas, 0, 3);
+            layout.SetColumnSpan(_texturas, 5);
 
             Controls.Add(layout);
         }
+        public IEnumerable<string> TexturasSelecionadas
+        {
+            get
+            {
+                foreach (var item in _texturas.CheckedItems)
+                    yield return item.ToString();
+            }
+        }
 
+        public void DefinirTexturasDisponiveis(
+            IEnumerable<string> texturas)
+        {
+            _texturas.Items.Clear();
+
+            if (texturas == null)
+                return;
+
+            foreach (var textura in texturas)
+            {
+                if (string.IsNullOrWhiteSpace(textura))
+                    continue;
+
+                _texturas.Items.Add(textura);
+            }
+        }
         public bool TentarCriarMatriz(
             out MatrizCadastro matriz,
             out string erro)
@@ -241,6 +275,10 @@ namespace ProjetosCADLaser.Controls
             _eixos.SelectedIndex = -1;
             _maquina.SelectedIndex = -1;
             _acabamento.SelectedIndex = -1;
+            for (var i=0;
+                i<_texturas.Items.Count;
+                i++)
+            { _texturas.SetItemChecked(i, false); }
         }
 
         // Mantidos temporariamente para o
@@ -295,7 +333,13 @@ namespace ProjetosCADLaser.Controls
                     : Acabamento.Fosco;
             }
         }
-
+        private readonly CheckedListBox _texturas =
+            new CheckedListBox
+            {
+                Width = 650,
+                Height = 80,
+                CheckOnClick = true
+            };
         // Temporário para manter compatibilidade
         // com o controle antigo.
         public event EventHandler RemoverSolicitado;

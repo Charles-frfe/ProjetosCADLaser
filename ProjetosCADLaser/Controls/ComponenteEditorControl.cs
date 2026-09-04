@@ -46,7 +46,9 @@ namespace ProjetosCADLaser.Controls
 
         public ComponenteEditorControl(
             string nome,
-            IEnumerable<string> tiposMatriz = null)
+            IEnumerable<string> tiposMatriz = null,
+            IEnumerable<string> texturasDisponiveis=null)
+            
         {
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -57,7 +59,8 @@ namespace ProjetosCADLaser.Controls
             _nome.Text = nome;
 
             _novaMatriz =
-                new MatrizEditorControl(tiposMatriz);
+                new MatrizEditorControl(tiposMatriz,
+                texturasDisponiveis);
 
             var layout =
                 new TableLayoutPanel
