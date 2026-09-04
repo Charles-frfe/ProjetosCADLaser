@@ -51,6 +51,7 @@ namespace ProjetosCADLaser.Forms
                 FlowDirection = FlowDirection.TopDown,
                 WrapContents = false
             };
+        private readonly ObservacoesControl _observacoes = new ObservacoesControl();
         private readonly Dictionary<string,
             ComponenteEditorControl>
             _editorPorComponente =
@@ -60,7 +61,13 @@ namespace ProjetosCADLaser.Forms
         public CadastroPilotoForm(AppServices servicos, ConfiguracaoLocal local)
         {
             InitializeComponent();
-            _servicos = servicos; _local = local; _sessaoAnexos = _servicos.Anexos.CriarSessao(); _etapaRevisao = new EtapaRevisaoControl(); _etapaRevisao.ConfigurarSessao(_servicos.Anexos, _sessaoAnexos);
+            _servicos = servicos; _local = local; _sessaoAnexos = _servicos.Anexos.CriarSessao(); _etapaRevisao = new EtapaRevisaoControl();
+            _etapaRevisao.ConfigurarSessao(
+                _servicos.Anexos, 
+                _sessaoAnexos);
+            _observacoes.ConfigurarSessao(
+                _servicos.Anexos,
+                _sessaoAnexos);
             _heartbeat.Tick += delegate { if (_bloqueio != null && !string.IsNullOrWhiteSpace(_caminhoBloqueio)) try { _servicos.Bloqueios.Atualizar(_caminhoBloqueio, _bloqueio); } catch { } };
             FormClosed += delegate { _heartbeat.Stop(); if (_bloqueio != null && !string.IsNullOrWhiteSpace(_caminhoBloqueio)) try { _servicos.Bloqueios.Remover(_caminhoBloqueio, _bloqueio); } catch { } _bloqueio = null; try { _servicos.Anexos.LimparSessao(_sessaoAnexos); } catch { } };
             if (local == null || string.IsNullOrWhiteSpace(local.PastaRaizDados)) throw new InvalidOperationException("A pasta raiz não está configurada.");
@@ -81,7 +88,7 @@ namespace ProjetosCADLaser.Forms
                 AutoScroll=true,
                 Padding = new Padding(30),
                 ColumnCount = 2,
-                RowCount = 8
+                RowCount = 9
             };
 
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -127,11 +134,15 @@ namespace ProjetosCADLaser.Forms
             layout.Controls.Add(_editoresComponentes, 0, 5);
             layout.SetColumnSpan(_editoresComponentes, 2);
             layout.Controls.Add(
+                _observacoes, 0, 6);
+            layout.SetColumnSpan(
+                _observacoes, 2);
+            layout.Controls.Add(
                 new Label { Text = "Anexos pendentes", AutoSize = true },
                 0,
-                6);
+                7);
 
-            layout.Controls.Add(_etapaRevisao, 1, 6);
+            layout.Controls.Add(_etapaRevisao, 1, 7);
 
             _etapaMatrizes.ConfiguracaoAlterada += delegate
             {
@@ -172,7 +183,7 @@ namespace ProjetosCADLaser.Forms
             botoes.Controls.Add(cancelar);
             botoes.Controls.Add(salvar);
 
-            layout.Controls.Add(botoes, 0, 7);
+            layout.Controls.Add(botoes, 0, 8);
             layout.SetColumnSpan(botoes, 2);
 
             Controls.Add(layout);

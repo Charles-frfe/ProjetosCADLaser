@@ -52,6 +52,9 @@
     <Compile Include="Controls\MatrizEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Controls\ObservacoesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Models\AnalisePasta.cs" />
     <Compile Include="Models\Cadastros.cs" />
     <Compile Include="Models\Configuracoes.cs" />
