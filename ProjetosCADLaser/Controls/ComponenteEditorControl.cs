@@ -297,4 +297,9 @@ namespace ProjetosCADLaser.Controls
                 return "-";
 
             return valor.Value ==
-                Acabamento.P
+                Acabamento.Polido
+                    ? "Polido"
+                    : "Fosco";
+        }
+    }
+}
