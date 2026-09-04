@@ -18,7 +18,7 @@ namespace ProjetosCADLaser.Controls
             new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 110
+                Width = 120
             };
 
         private readonly ComboBox _eixos =
@@ -39,23 +39,17 @@ namespace ProjetosCADLaser.Controls
             new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 100
-            };
-
-        private readonly Button _remover =
-            new Button
-            {
-                Text = "Remover",
-                AutoSize = true
+                Width = 110
             };
 
         public MatrizEditorControl(
             IEnumerable<string> tiposMatriz = null)
         {
             AutoSize = true;
-            Dock = DockStyle.Top;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
 
-            var tipos = tiposMatriz ??
+            var tipos =
+                tiposMatriz ??
                 new[]
                 {
                     "Gravação",
@@ -65,11 +59,6 @@ namespace ProjetosCADLaser.Controls
 
             foreach (var tipo in tipos)
                 _tipo.Items.Add(tipo);
-
-            if (_tipo.Items.Count == 0)
-                _tipo.Items.Add("Gravação");
-
-            _tipo.SelectedIndex = 0;
 
             _material.Items.AddRange(
                 new object[]
@@ -101,18 +90,17 @@ namespace ProjetosCADLaser.Controls
                     "Polido"
                 });
 
-            _material.SelectedIndex = 0;
-            _eixos.SelectedIndex = 0;
-            _maquina.SelectedIndex = 0;
-            _acabamento.SelectedIndex = 0;
+            Limpar();
 
-            var layout = new TableLayoutPanel
-            {
-                AutoSize = true,
-                Dock = DockStyle.Fill,
-                ColumnCount = 6,
-                RowCount = 2
-            };
+            var layout =
+                new TableLayoutPanel
+                {
+                    AutoSize = true,
+                    AutoSizeMode =
+                        AutoSizeMode.GrowAndShrink,
+                    ColumnCount = 5,
+                    RowCount = 2
+                };
 
             layout.Controls.Add(
                 new Label
@@ -164,17 +152,99 @@ namespace ProjetosCADLaser.Controls
             layout.Controls.Add(_eixos, 2, 1);
             layout.Controls.Add(_maquina, 3, 1);
             layout.Controls.Add(_acabamento, 4, 1);
-            layout.Controls.Add(_remover, 5, 1);
 
             Controls.Add(layout);
-
-            _remover.Click += delegate
-            {
-                if (RemoverSolicitado != null)
-                    RemoverSolicitado(this, EventArgs.Empty);
-            };
         }
 
+        public bool TentarCriarMatriz(
+            out MatrizCadastro matriz,
+            out string erro)
+        {
+            matriz = null;
+            erro = null;
+
+            if (_tipo.SelectedIndex < 0)
+            {
+                erro = "Selecione o tipo de matriz.";
+                return false;
+            }
+
+            if (_material.SelectedIndex < 0)
+            {
+                erro = "Selecione o material.";
+                return false;
+            }
+
+            if (_eixos.SelectedIndex < 0)
+            {
+                erro = "Selecione os eixos.";
+                return false;
+            }
+
+            if (_maquina.SelectedIndex < 0)
+            {
+                erro = "Selecione a máquina.";
+                return false;
+            }
+
+            if (_acabamento.SelectedIndex < 0)
+            {
+                erro = "Selecione o acabamento.";
+                return false;
+            }
+
+            MaterialMatriz material;
+
+            if (_material.SelectedIndex == 1)
+                material = MaterialMatriz.Aco;
+            else if (_material.SelectedIndex == 2)
+                material = MaterialMatriz.Aluminio;
+            else
+                material = MaterialMatriz.Zamak;
+
+            QuantidadeEixos eixos =
+                _eixos.SelectedIndex == 1
+                    ? QuantidadeEixos.Cinco
+                    : QuantidadeEixos.Tres;
+
+            Maquina maquina;
+
+            if (_maquina.SelectedIndex == 1)
+                maquina = Maquina.M1200P;
+            else if (_maquina.SelectedIndex == 2)
+                maquina = Maquina.M1200S;
+            else
+                maquina = Maquina.M1000;
+
+            Acabamento acabamento =
+                _acabamento.SelectedIndex == 1
+                    ? Acabamento.Polido
+                    : Acabamento.Fosco;
+
+            matriz =
+                new MatrizCadastro
+                {
+                    Tipo = _tipo.Text,
+                    Material = material,
+                    Eixos = eixos,
+                    Maquina = maquina,
+                    Acabamento = acabamento
+                };
+
+            return true;
+        }
+
+        public void Limpar()
+        {
+            _tipo.SelectedIndex = -1;
+            _material.SelectedIndex = -1;
+            _eixos.SelectedIndex = -1;
+            _maquina.SelectedIndex = -1;
+            _acabamento.SelectedIndex = -1;
+        }
+
+        // Mantidos temporariamente para o
+        // ComponenteEditorControl antigo compilar.
         public string Tipo
         {
             get { return _tipo.Text; }
@@ -184,13 +254,11 @@ namespace ProjetosCADLaser.Controls
         {
             get
             {
-                if (_material.SelectedIndex == 1)
-                    return MaterialMatriz.Aco;
-
-                if (_material.SelectedIndex == 2)
-                    return MaterialMatriz.Aluminio;
-
-                return MaterialMatriz.Zamak;
+                return _material.SelectedIndex == 1
+                    ? MaterialMatriz.Aco
+                    : _material.SelectedIndex == 2
+                        ? MaterialMatriz.Aluminio
+                        : MaterialMatriz.Zamak;
             }
         }
 
@@ -228,6 +296,8 @@ namespace ProjetosCADLaser.Controls
             }
         }
 
+        // Temporário para manter compatibilidade
+        // com o controle antigo.
         public event EventHandler RemoverSolicitado;
     }
 }

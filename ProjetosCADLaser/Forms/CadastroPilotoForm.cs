@@ -391,10 +391,8 @@ namespace ProjetosCADLaser.Forms
             {
                 ComponenteEditorControl editor;
 
-                if (_editorPorComponente.TryGetValue(
-                    nome,
-                    out editor))
-                {
+                if (_editorPorComponente.TryGetValue(nome,out editor))
+                { editor.DefinirTexturasDisponiveis(_etapaDeteccao.TexturasSelecionadas);
                     _editoresComponentes.Controls.Add(editor);
                 }
             }
