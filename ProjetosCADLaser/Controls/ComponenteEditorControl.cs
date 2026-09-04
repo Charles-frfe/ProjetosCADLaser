@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using ProjetosCADLaser.Models;
@@ -15,13 +15,7 @@ namespace ProjetosCADLaser.Controls
                     "Segoe UI Semibold",
                     11F)
             };
-        private readonly CheckedListBox _texturas =
-            new CheckedListBox
-            {
-                Width = 650,
-                Height = 90,
-                CheckOnClick = true
-            };
+
         private readonly FlowLayoutPanel _listaMatrizes =
             new FlowLayoutPanel
             {
@@ -72,7 +66,7 @@ namespace ProjetosCADLaser.Controls
                     AutoSizeMode =
                         AutoSizeMode.GrowAndShrink,
                     ColumnCount = 1,
-                    RowCount = 9
+                    RowCount = 7
                 };
 
             layout.Controls.Add(
@@ -120,17 +114,6 @@ namespace ProjetosCADLaser.Controls
                 0,
                 6);
 
-            layout.Controls.Add(
-                new Label
-                {
-                    Text = "Texturas do componente",
-                    AutoSize = true,
-                    Margin = new Padding(0, 12, 0, 4)
-                },
-                0,
-                7);
-            layout.Controls.Add(_texturas, 0, 8);
-
             Controls.Add(layout);
 
             _adicionarMatriz.Click += delegate
@@ -151,42 +134,6 @@ namespace ProjetosCADLaser.Controls
             get { return _matrizesAdicionadas; }
         }
 
-        public IEnumerable<string> TexturasSelecionadas
-        {
-            get
-            {
-                foreach (var item in _texturas.CheckedItems)
-                    yield return item.ToString();
-            }
-        }
-
-        public void DefinirTexturasDisponiveis(
-            IEnumerable<string> texturas)
-        {
-            var selecionadas =
-                new HashSet<string>(
-                    TexturasSelecionadas,
-                    StringComparer.OrdinalIgnoreCase);
-
-            _texturas.Items.Clear();
-
-            if (texturas == null)
-                return;
-
-            foreach (var textura in texturas)
-            {
-                if (string.IsNullOrWhiteSpace(textura))
-                    continue;
-
-                var indice =
-                    _texturas.Items.Add(textura);
-
-                if (selecionadas.Contains(textura))
-                    _texturas.SetItemChecked(
-                        indice,
-                        true);
-            }
-        }
         private void AdicionarMatriz()
         {
             MatrizCadastro matriz;
