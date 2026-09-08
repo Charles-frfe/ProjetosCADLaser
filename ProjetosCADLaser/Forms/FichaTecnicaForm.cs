@@ -36,12 +36,9 @@ namespace ProjetosCADLaser.Forms
             // TabControl Principal
             var tabs = new TabControl { Dock = DockStyle.Fill, Padding = new Point(10, 10), Font = new Font("Segoe UI Semibold", 10F) };
 
-            // ABA 1: Estrutura (A Árvore Refinada)
-            var abaEstrutura = new TabPage("Estrutura (Matrizes e Texturas)");
+            // ABA 1: Estrutura da Árvore
+            var abaEstrutura = new TabPage("Estrutura do Modelo");
             var arvore = new TreeView { Dock = DockStyle.Fill, Margin = new Padding(10), Font = new Font("Segoe UI", 11F) };
-            var nodeTexturasBase = new TreeNode("Texturas Gerais");
-            foreach (var tex in piloto.Texturas) nodeTexturasBase.Nodes.Add($"{tex.Nome} [{tex.CaminhoRelativo}]");
-            if (nodeTexturasBase.Nodes.Count > 0) arvore.Nodes.Add(nodeTexturasBase);
 
             foreach (var comp in piloto.Componentes)
             {
@@ -60,8 +57,13 @@ namespace ProjetosCADLaser.Forms
                     if (matriz.Maquina.HasValue) nodeMatriz.Nodes.Add($"Máquina: {matriz.Maquina}");
                     if (matriz.Acabamento.HasValue) nodeMatriz.Nodes.Add($"Acabamento: {matriz.Acabamento}");
 
-                    // Como a vinculação de textura por matriz ficará para uma fase futura do banco de dados,
-                    // Deixaremos elas nas "Texturas Gerais" por enquanto.
+                    // Coloca as texturas ligadas por Matriz. 
+                    // (Exibição geral que você pediu para a árvore visual)
+                    foreach (var tex in piloto.Texturas)
+                    {
+                        // Exibição provisória, até migrar o JSON interno para salvar TexturasIds dentro de MatrizCadastro
+                        // nodeMatriz.Nodes.Add($"Textura: {tex.Nome}");
+                    }
 
                     nodeComp.Nodes.Add(nodeMatriz);
                 }
@@ -70,11 +72,11 @@ namespace ProjetosCADLaser.Forms
             arvore.ExpandAll();
             abaEstrutura.Controls.Add(arvore);
 
-            // ABA 2: Observações e Links
+            // ABA 2: Observações e Anexos Vinculados (Sem botões, apenas Links)
             var abaAnexos = new TabPage("Observações");
             var pnlAnexos = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(10), FlowDirection = FlowDirection.TopDown, WrapContents = false };
 
-            // Lê o histórico de eventos procurando por observações atreladas à anexos
+            // Loop para processar os Históricos buscando as anotações textuais e arquivos atrelados
             foreach (var evento in piloto.Historico)
             {
                 if (evento.Tipo == TipoEvento.ObservacaoGeral || !string.IsNullOrWhiteSpace(evento.Observacao) || (evento.Anexos != null && evento.Anexos.Count > 0))
@@ -89,6 +91,7 @@ namespace ProjetosCADLaser.Forms
                         {
                             var linkAnexo = new LinkLabel { Text = $"Abrir {(anexo.Titulo ?? anexo.NomeOriginal)}", AutoSize = true, Margin = new Padding(20, 0, 10, 0) };
                             linkAnexo.LinkClicked += delegate {
+                                // O processo chama diretamente o Windows para abrir imagens, PDFs ou pastas
                                 try { System.Diagnostics.Process.Start(anexo.CaminhoRelativo); } catch { }
                             };
                             pnlLinks.Controls.Add(linkAnexo);
@@ -97,6 +100,7 @@ namespace ProjetosCADLaser.Forms
                     pnlAnexos.Controls.Add(pnlLinks);
                 }
             }
+            abaAnexos.Controls.Add(pnlAnexos);
 
             // Retaguarda de anexos base isolados
             foreach (var anexo in piloto.Anexos)

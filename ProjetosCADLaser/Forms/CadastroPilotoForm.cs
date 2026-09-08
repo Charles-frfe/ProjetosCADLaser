@@ -85,7 +85,7 @@ namespace ProjetosCADLaser.Forms
             // 1. Criação do TabControl (Wizard)
             _wizardTab = new TabControl { Dock = DockStyle.Fill, ItemSize = new Size(0, 1), SizeMode = TabSizeMode.Fixed, Appearance = TabAppearance.FlatButtons };
 
-            // ABA 1: Identificação
+            // ABA 1: Identificação (Sem Pasta de Origem)
             var abaOrigem = new TabPage("1. Identificação");
             var pnlOrigem = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, Padding = new Padding(30) };
             pnlOrigem.Controls.Add(new Label { Text = "Identificação do Projeto", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true });
@@ -96,40 +96,44 @@ namespace ProjetosCADLaser.Forms
             pnlOrigem.Controls.Add(_nome);
             abaOrigem.Controls.Add(pnlOrigem);
 
-            // ABA 2: Escaneamento e Texturas
+            // ABA 2: Escaneamento e Texturas (Mantido igual)
             var abaComponentes = new TabPage("2. Escaneamento");
             var pnlComponentes = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 2, Padding = new Padding(30) };
             pnlComponentes.Controls.Add(new Label { Text = "Componentes e Texturas Detectadas", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true }, 0, 0);
             pnlComponentes.SetColumnSpan(pnlComponentes.GetControlFromPosition(0, 0), 2);
-
-            // Reutiliza o controle _etapaDeteccao e o botão analisar já existentes no topo do seu código
             _analisar.Height = 35; _analisar.Width = 200; _analisar.Margin = new Padding(0, 0, 0, 10);
             _analisar.Click += delegate { AnalisarPasta(); };
             pnlComponentes.Controls.Add(_analisar, 0, 1);
             pnlComponentes.SetColumnSpan(_analisar, 2);
-
             _etapaDeteccao.ComponentesAlterados += delegate { AtualizarEditoresComponentes(); };
             _etapaDeteccao.Dock = DockStyle.Fill;
             pnlComponentes.Controls.Add(_etapaDeteccao, 0, 2);
             pnlComponentes.SetColumnSpan(_etapaDeteccao, 2);
             abaComponentes.Controls.Add(pnlComponentes);
 
-            // ABA 3: Configuração de Matrizes (Apenas por Componente)
+            // ABA 3: Matrizes por Componente (Removido Combobox Gerais)
             var abaMatriz = new TabPage("3. Matrizes");
             var pnlMatriz = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, AutoScroll = true, Padding = new Padding(20) };
             pnlMatriz.Controls.Add(new Label { Text = "Matrizes por Componente", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true });
             pnlMatriz.Controls.Add(_editoresComponentes);
             abaMatriz.Controls.Add(pnlMatriz);
 
-            // ABA 4: Observações
+            // ABA 4: Observações (Único local para anexar arquivos/imagens no controle nativo)
             var abaObservacoes = new TabPage("4. Observações");
             var pnlObs = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Padding = new Padding(20) };
             pnlObs.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             pnlObs.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            pnlObs.Controls.Add(new Label { Text = "Observações", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true }, 0, 0);
+            pnlObs.Controls.Add(new Label { Text = "Observações do Projeto", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true }, 0, 0);
+
             _observacoes.Dock = DockStyle.Fill;
             pnlObs.Controls.Add(_observacoes, 0, 1);
             abaObservacoes.Controls.Add(pnlObs);
+
+            // Adiciona as abas no controle
+            _wizardTab.TabPages.Add(abaOrigem);
+            _wizardTab.TabPages.Add(abaComponentes);
+            _wizardTab.TabPages.Add(abaMatriz);
+            _wizardTab.TabPages.Add(abaObservacoes);
 
             // 2. Painel de Rodapé (Avançar e Voltar)
             var rodape = new FlowLayoutPanel { Dock = DockStyle.Bottom, FlowDirection = FlowDirection.RightToLeft, Height = 65, Padding = new Padding(15) };
