@@ -85,20 +85,15 @@ namespace ProjetosCADLaser.Forms
             // 1. Criação do TabControl (Wizard)
             _wizardTab = new TabControl { Dock = DockStyle.Fill, ItemSize = new Size(0, 1), SizeMode = TabSizeMode.Fixed, Appearance = TabAppearance.FlatButtons };
 
-            // ABA 1: Identificação e Origem
+            // ABA 1: Identificação
             var abaOrigem = new TabPage("1. Identificação");
             var pnlOrigem = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, Padding = new Padding(30) };
             pnlOrigem.Controls.Add(new Label { Text = "Identificação do Projeto", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true });
             pnlOrigem.Controls.Add(new Label { Text = "Código do modelo:", AutoSize = true });
             pnlOrigem.Controls.Add(_codigo);
             _codigo.Leave += async delegate { await LocalizarPilotoAutomaticamente(); };
-
             pnlOrigem.Controls.Add(new Label { Text = "Nome do modelo:", AutoSize = true, Margin = new Padding(0, 15, 0, 0) });
             pnlOrigem.Controls.Add(_nome);
-
-            pnlOrigem.Controls.Add(new Label { Text = "Pasta de Origem:", AutoSize = true, Margin = new Padding(0, 15, 0, 0) });
-            pnlOrigem.Controls.Add(_origem);
-
             abaOrigem.Controls.Add(pnlOrigem);
 
             // ABA 2: Escaneamento e Texturas
@@ -119,56 +114,22 @@ namespace ProjetosCADLaser.Forms
             pnlComponentes.SetColumnSpan(_etapaDeteccao, 2);
             abaComponentes.Controls.Add(pnlComponentes);
 
-            // ABA 3: Configuração de Matrizes (Parâmetros Técnicos e Componentes Dinâmicos)
+            // ABA 3: Configuração de Matrizes (Apenas por Componente)
             var abaMatriz = new TabPage("3. Matrizes");
-            var pnlMatriz = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, AutoScroll = true, WrapContents = false, Padding = new Padding(30) };
-            pnlMatriz.Controls.Add(new Label { Text = "Parâmetros Técnicos e Matrizes", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true });
-
-            pnlMatriz.Controls.Add(new Label { Text = "Tipo de Matriz Geral:", AutoSize = true }); pnlMatriz.Controls.Add(_tipoMatriz);
-            pnlMatriz.Controls.Add(new Label { Text = "Material:", AutoSize = true }); pnlMatriz.Controls.Add(_material);
-            pnlMatriz.Controls.Add(new Label { Text = "Eixos:", AutoSize = true }); pnlMatriz.Controls.Add(_eixos);
-            pnlMatriz.Controls.Add(new Label { Text = "Máquina e Acabamento:", AutoSize = true, Margin = new Padding(0, 10, 0, 0) });
-            var rowMatriz = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
-            rowMatriz.Controls.Add(_maquina); rowMatriz.Controls.Add(_acabamento);
-            pnlMatriz.Controls.Add(rowMatriz);
-            pnlMatriz.Controls.Add(_matrizResumo);
-
-            pnlMatriz.Controls.Add(new Label { Text = "Matrizes por Componente:", Font = new Font("Segoe UI", 12F, FontStyle.Bold), Margin = new Padding(0, 20, 0, 10), AutoSize = true });
-            pnlMatriz.Controls.Add(_editoresComponentes); // O controle dinâmico dos componentes
+            var pnlMatriz = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, AutoScroll = true, Padding = new Padding(20) };
+            pnlMatriz.Controls.Add(new Label { Text = "Matrizes por Componente", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true });
+            pnlMatriz.Controls.Add(_editoresComponentes);
             abaMatriz.Controls.Add(pnlMatriz);
 
-            // ABA 4: Observações e Anexos (A tela final)
-            var abaObservacoes = new TabPage("4. Detalhes Finais");
-            var pnlFinal = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 1, Padding = new Padding(30) };
-            pnlFinal.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Título
-            pnlFinal.RowStyles.Add(new RowStyle(SizeType.Percent, 50)); // Observações
-            pnlFinal.RowStyles.Add(new RowStyle(SizeType.Percent, 50)); // Anexos
-
-            pnlFinal.Controls.Add(new Label { Text = "Observações e Anexos", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true }, 0, 0);
-
+            // ABA 4: Observações
+            var abaObservacoes = new TabPage("4. Observações");
+            var pnlObs = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1, Padding = new Padding(20) };
+            pnlObs.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            pnlObs.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            pnlObs.Controls.Add(new Label { Text = "Observações", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true }, 0, 0);
             _observacoes.Dock = DockStyle.Fill;
-            pnlFinal.Controls.Add(_observacoes, 0, 1);
-
-            var pnlAnex = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 2 };
-            var btnAddAnexo = new Button { Text = "Adicionar Anexo", AutoSize = true, Height = 35 };
-            btnAddAnexo.Click += delegate { AdicionarAnexo(); };
-            pnlAnex.Controls.Add(btnAddAnexo, 0, 0);
-
-            var btnRemAnexo = new Button { Text = "Remover", AutoSize = true, Height = 35 };
-            btnRemAnexo.Click += delegate { RemoverAnexo(); };
-            pnlAnex.Controls.Add(btnRemAnexo, 1, 0);
-
-            pnlAnex.Controls.Add(_anexos, 0, 1);
-            pnlAnex.SetColumnSpan(_anexos, 2);
-            pnlFinal.Controls.Add(pnlAnex, 0, 2);
-
-            abaObservacoes.Controls.Add(pnlFinal);
-
-            // Adiciona as 4 abas no controle
-            _wizardTab.TabPages.Add(abaOrigem);
-            _wizardTab.TabPages.Add(abaComponentes);
-            _wizardTab.TabPages.Add(abaMatriz);
-            _wizardTab.TabPages.Add(abaObservacoes);
+            pnlObs.Controls.Add(_observacoes, 0, 1);
+            abaObservacoes.Controls.Add(pnlObs);
 
             // 2. Painel de Rodapé (Avançar e Voltar)
             var rodape = new FlowLayoutPanel { Dock = DockStyle.Bottom, FlowDirection = FlowDirection.RightToLeft, Height = 65, Padding = new Padding(15) };

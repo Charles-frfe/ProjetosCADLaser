@@ -36,34 +36,74 @@ namespace ProjetosCADLaser.Forms
             // TabControl Principal
             var tabs = new TabControl { Dock = DockStyle.Fill, Padding = new Point(10, 10), Font = new Font("Segoe UI Semibold", 10F) };
 
-            // ABA 1: Estrutura (A antiga TreeView)
+            // ABA 1: Estrutura (A Árvore Refinada)
             var abaEstrutura = new TabPage("Estrutura (Matrizes e Texturas)");
             var arvore = new TreeView { Dock = DockStyle.Fill, Margin = new Padding(10), Font = new Font("Segoe UI", 11F) };
             var nodeTexturasBase = new TreeNode("Texturas Gerais");
             foreach (var tex in piloto.Texturas) nodeTexturasBase.Nodes.Add($"{tex.Nome} [{tex.CaminhoRelativo}]");
             if (nodeTexturasBase.Nodes.Count > 0) arvore.Nodes.Add(nodeTexturasBase);
+
             foreach (var comp in piloto.Componentes)
             {
                 var nodeComp = new TreeNode($"Componente: {comp.Nome}");
                 foreach (var matriz in comp.Matrizes)
                 {
-                    string infoMatriz = $"{matriz.Tipo}";
-                    if (matriz.Material.HasValue) infoMatriz += $" / {matriz.Material}";
-                    if (matriz.Eixos.HasValue) infoMatriz += $" / {matriz.Eixos} eixos";
-                    nodeComp.Nodes.Add(new TreeNode(infoMatriz));
+                    var nodeMatriz = new TreeNode(matriz.Tipo);
+                    if (matriz.Material.HasValue) nodeMatriz.Nodes.Add($"Material: {matriz.Material}");
+                    if (matriz.Eixos.HasValue)
+                    {
+                        string valEixos = matriz.Eixos.ToString();
+                        if (valEixos == "Tres") valEixos = "3x";
+                        else if (valEixos == "Cinco") valEixos = "5x";
+                        nodeMatriz.Nodes.Add($"Eixos: {valEixos}");
+                    }
+                    if (matriz.Maquina.HasValue) nodeMatriz.Nodes.Add($"Máquina: {matriz.Maquina}");
+                    if (matriz.Acabamento.HasValue) nodeMatriz.Nodes.Add($"Acabamento: {matriz.Acabamento}");
+
+                    // Como a vinculação de textura por matriz ficará para uma fase futura do banco de dados,
+                    // Deixaremos elas nas "Texturas Gerais" por enquanto.
+
+                    nodeComp.Nodes.Add(nodeMatriz);
                 }
                 arvore.Nodes.Add(nodeComp);
             }
             arvore.ExpandAll();
             abaEstrutura.Controls.Add(arvore);
 
-            // ABA 2: Anexos
-            var abaAnexos = new TabPage($"Anexos ({piloto.Anexos.Count})");
-            var pnlAnexos = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(10) };
+            // ABA 2: Observações e Links
+            var abaAnexos = new TabPage("Observações");
+            var pnlAnexos = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(10), FlowDirection = FlowDirection.TopDown, WrapContents = false };
+
+            // Lê o histórico de eventos procurando por observações atreladas à anexos
+            foreach (var evento in piloto.Historico)
+            {
+                if (evento.Tipo == TipoEvento.ObservacaoGeral || !string.IsNullOrWhiteSpace(evento.Observacao) || (evento.Anexos != null && evento.Anexos.Count > 0))
+                {
+                    var lblObs = new Label { Text = $"- {evento.DataHora:dd/MM/yyyy}: {evento.Observacao ?? "Sem descrição"}", AutoSize = true, Font = new Font("Segoe UI", 11F), Margin = new Padding(0, 10, 0, 5) };
+                    pnlAnexos.Controls.Add(lblObs);
+
+                    var pnlLinks = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
+                    if (evento.Anexos != null)
+                    {
+                        foreach (var anexo in evento.Anexos)
+                        {
+                            var linkAnexo = new LinkLabel { Text = $"Abrir {(anexo.Titulo ?? anexo.NomeOriginal)}", AutoSize = true, Margin = new Padding(20, 0, 10, 0) };
+                            linkAnexo.LinkClicked += delegate {
+                                try { System.Diagnostics.Process.Start(anexo.CaminhoRelativo); } catch { }
+                            };
+                            pnlLinks.Controls.Add(linkAnexo);
+                        }
+                    }
+                    pnlAnexos.Controls.Add(pnlLinks);
+                }
+            }
+
+            // Retaguarda de anexos base isolados
             foreach (var anexo in piloto.Anexos)
             {
-                var btnAnexo = new Button { Text = (anexo.Titulo ?? anexo.NomeOriginal), AutoSize = true, MinimumSize = new Size(120, 35), Margin = new Padding(5) };
-                pnlAnexos.Controls.Add(btnAnexo);
+                var linkAnexo = new LinkLabel { Text = $"Arquivo Isolado: {(anexo.Titulo ?? anexo.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
+                linkAnexo.LinkClicked += delegate { try { System.Diagnostics.Process.Start(anexo.CaminhoRelativo); } catch { } };
+                pnlAnexos.Controls.Add(linkAnexo);
             }
             abaAnexos.Controls.Add(pnlAnexos);
 
