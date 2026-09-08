@@ -157,7 +157,7 @@ namespace ProjetosCADLaser.Forms
 
             var cancelar = new Button
             {
-                Text = "Cancelar",
+                Text = "CancelaRR",
                 AutoSize = true,
                 Height = 38
             };
