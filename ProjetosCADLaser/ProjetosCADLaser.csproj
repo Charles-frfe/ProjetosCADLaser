@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props" Condition="Exists('$(MSBuildToolsPath)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B8BE2E35-3A6B-4A8B-B461-A097A86C388D}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ProjetosCADLaser</RootNamespace>
+    <AssemblyName>ProjetosCADLaser</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <LangVersion>7.3</LangVersion>
+    <RuntimeIdentifiers>win</RuntimeIdentifiers>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Fixado para a Fase 2; validar round-trip V1 antes de atualizar. -->
+    <PackageReference Include="System.Text.Json" Version="6.0.10" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\ComponenteEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\MatrizEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ObservacoesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Models\AnalisePasta.cs" />
+    <Compile Include="Models\Cadastros.cs" />
+    <Compile Include="Models\Configuracoes.cs" />
+    <Compile Include="Models\Enums.cs" />
+    <Compile Include="Models\JsonContracts.cs" />
+    <Compile Include="Models\Lixeira.cs" />
+    <Compile Include="Configuration\EstruturaDados.cs" />
+    <Compile Include="Repositories\PilotoRepository.cs" />
+    <Compile Include="Services\AcessoPastaService.cs" />
+    <Compile Include="Services\AdministracaoService.cs" />
+    <Compile Include="Services\AnalisadorPastasService.cs" />
+    <Compile Include="Services\AnexoService.cs" />
+    <Compile Include="Services\BackupService.cs" />
+    <Compile Include="Services\BloqueioService.cs" />
+    <Compile Include="Services\CancelamentoPilotoService.cs" />
+    <Compile Include="Services\CadastroPilotoService.cs" />
+    <Compile Include="Services\ConfiguracaoServices.cs" />
+    <Compile Include="Services\ContinuacaoCadastroService.cs" />
+    <Compile Include="Services\EdicaoPilotoService.cs" />
+    <Compile Include="Services\DiagnosticoService.cs" />
+    <Compile Include="Services\AppServices.cs" />
+    <Compile Include="Services\InicializacaoService.cs" />
+    <Compile Include="Services\JsonService.cs" />
+    <Compile Include="Services\LixeiraService.cs" />
+    <Compile Include="Services\LogService.cs" />
+    <Compile Include="Services\MatrizService.cs" />
+    <Compile Include="Services\NormalizadorPesquisa.cs" />
+    <Compile Include="Services\PesquisaPastaOrigemService.cs" />
+    <Compile Include="Services\PesquisaPilotosService.cs" />
+    <Compile Include="Services\PinService.cs" />
+    <Compile Include="Services\TemaService.cs" />
+    <Compile Include="Services\TesteTexturaService.cs" />
+    <Compile Include="Controls\EtapaOrigemControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EtapaDeteccaoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EtapaMatrizesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EtapaRevisaoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\FormTemporarioCompilacao.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormTemporarioCompilacao.Designer.cs">
+      <DependentUpon>FormTemporarioCompilacao.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\PrimeiroUsoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PrimeiroUsoForm.Designer.cs">
+      <DependentUpon>PrimeiroUsoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\FolderPicker.cs" />
+    <EmbeddedResource Include="Forms\PrimeiroUsoForm.resx" />
+    <Compile Include="Forms\TelaInicialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TelaInicialForm.Designer.cs">
+      <DependentUpon>TelaInicialForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\TelaInicialForm.resx" />
+    <Compile Include="Forms\CadastroPilotoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CadastroPilotoForm.Designer.cs">
+      <DependentUpon>CadastroPilotoForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\CadastroPilotoForm.resx" />
+    <Compile Include="Forms\PesquisaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PesquisaForm.Designer.cs">
+      <DependentUpon>PesquisaForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\PesquisaForm.resx" />
+    <Compile Include="Forms\FichaTecnicaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FichaTecnicaForm.Designer.cs">
+      <DependentUpon>FichaTecnicaForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\FichaTecnicaForm.resx" />
+    <Compile Include="Forms\EditarPilotoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditarPilotoForm.Designer.cs">
+      <DependentUpon>EditarPilotoForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\EditarPilotoForm.resx" />
+    <Compile Include="Forms\LixeiraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\LixeiraForm.Designer.cs">
+      <DependentUpon>LixeiraForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\LixeiraForm.resx" />
+    <Compile Include="Forms\TesteTexturaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TesteTexturaForm.Designer.cs">
+      <DependentUpon>TesteTexturaForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\TesteTexturaForm.resx" />
+    <Compile Include="Forms\PesquisaTestesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PesquisaTestesForm.Designer.cs">
+      <DependentUpon>PesquisaTestesForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\PesquisaTestesForm.resx" />
+    <Compile Include="Forms\FichaTesteTexturaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FichaTesteTexturaForm.Designer.cs">
+      <DependentUpon>FichaTesteTexturaForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\FichaTesteTexturaForm.resx" />
+    <Compile Include="Forms\EditarTesteTexturaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditarTesteTexturaForm.Designer.cs">
+      <DependentUpon>EditarTesteTexturaForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\EditarTesteTexturaForm.resx" />
+    <Compile Include="Utilities\Apresentacao.cs" />
+    <Compile Include="Development\GeradorDadosFicticios.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Forms\FormTemporarioCompilacao.resx">
+      <DependentUpon>FormTemporarioCompilacao.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

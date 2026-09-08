@@ -1,0 +1,15 @@
+.vs/
+**/bin/
+**/obj/
+TestResults/
+packages/
+
+*.user
+*.suo
+*.pdb
+*.exe
+*.dll
+*.zip
+# Relatorios internos de desenvolvimento
+RELATORIO_*.md
+INVENTARIO_TECNICO_FASE1.md
