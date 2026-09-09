@@ -53,7 +53,11 @@ namespace ProjetosCADLaser.Forms
                     // Coloca as texturas ligadas por Matriz. 
                     foreach (var tex in piloto.Texturas)
                     {
-                        nodeMatriz.Nodes.Add($"Textura: {tex.Nome}");
+                        // Mostra a textura apenas se ela estiver vinculada à Matriz atual
+                        if (matriz.TexturasIds != null && matriz.TexturasIds.Contains(tex.Id))
+                        {
+                            nodeMatriz.Nodes.Add($"Textura: {tex.Nome}");
+                        }
                     }
 
                     nodeComp.Nodes.Add(nodeMatriz);
@@ -81,16 +85,30 @@ namespace ProjetosCADLaser.Forms
                     {
                         foreach (var anexo in evento.Anexos)
                         {
-                            var linkAnexo = new LinkLabel { Text = $"Abrir {(anexo.Titulo ?? anexo.NomeOriginal)}", AutoSize = true, Margin = new Padding(20, 0, 10, 0) };
-
-                            // Montamos o caminho absoluto e usamos UseShellExecute para o Windows forçar a abertura da Imagem/Arquivo
-                            var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", anexo.CaminhoRelativo ?? string.Empty);
+                            var _anexoCaptura = anexo; // Captura para o delegate local
+                            var linkAnexo = new LinkLabel { Text = $"Abrir {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(20, 0, 10, 0) };
                             linkAnexo.LinkClicked += delegate {
+                                var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
                                 try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
                             };
                             pnlLinks.Controls.Add(linkAnexo);
                         }
                     }
+                    pnlAnexos.Controls.Add(pnlLinks);
+                }
+            }
+            // Retaguarda de anexos base caso estejam salvos em piloto.Anexos e não dentro dos Eventos
+            foreach (var anexo in piloto.Anexos)
+            {
+                var _anexoCaptura = anexo; // Captura para o delegate local
+                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
+                linkAnexo.LinkClicked += delegate {
+                    var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
+                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
+                };
+                pnlAnexos.Controls.Add(linkAnexo);
+            }
+        }
                     pnlAnexos.Controls.Add(pnlLinks);
                 }
             }
