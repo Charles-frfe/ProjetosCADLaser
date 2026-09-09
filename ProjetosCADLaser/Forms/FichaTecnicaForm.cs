@@ -1,3 +1,4 @@
+// Analisado
 using System;
 using System.Drawing;
 using System.IO;
@@ -108,19 +109,7 @@ namespace ProjetosCADLaser.Forms
                 };
                 pnlAnexos.Controls.Add(linkAnexo);
             }
-        }
-                    pnlAnexos.Controls.Add(pnlLinks);
-                }
-            }
 
-            // Retaguarda caso tenha ficado algum anexo perdido no padrão antigo
-            foreach (var anexo in piloto.Anexos)
-            {
-                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(anexo.Titulo ?? anexo.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
-                var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", anexo.CaminhoRelativo ?? string.Empty);
-                linkAnexo.LinkClicked += delegate { try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { } };
-                pnlAnexos.Controls.Add(linkAnexo);
-            }
             abaAnexos.Controls.Add(pnlAnexos);
 
             // ABA 3: Histórico de Auditoria
@@ -195,6 +184,3 @@ namespace ProjetosCADLaser.Forms
         }
     }
 }
-        
-
-    
