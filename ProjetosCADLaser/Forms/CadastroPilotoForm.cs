@@ -58,9 +58,21 @@ namespace ProjetosCADLaser.Forms
             new Dictionary<string,
                 ComponenteEditorControl>(
                 StringComparer.OrdinalIgnoreCase);
-        public CadastroPilotoForm(AppServices servicos, ConfiguracaoLocal local)
+        private PilotoCadastro _pilotoEdicao;
+        public CadastroPilotoForm(AppServices servicos, ConfiguracaoLocal local, PilotoCadastro pilotoEdicao = null)
         {
             InitializeComponent();
+            _pilotoEdicao = pilotoEdicao;
+            Load += delegate {
+                if (_pilotoEdicao != null)
+                {
+                    _codigo.Text = _pilotoEdicao.Codigo;
+                    _nome.Text = _pilotoEdicao.NomeModelo;
+                    _origem.Text = _pilotoEdicao.PastaOrigem;
+                    _codigo.Enabled = false;
+                    AnalisarPasta();
+                }
+            };
             _servicos = servicos; _local = local; _sessaoAnexos = _servicos.Anexos.CriarSessao(); _etapaRevisao = new EtapaRevisaoControl();
             _etapaRevisao.ConfigurarSessao(
                 _servicos.Anexos, 
@@ -292,15 +304,22 @@ namespace ProjetosCADLaser.Forms
             try
             {
                 _caminhoBloqueio = _servicos.Bloqueios.ObterCaminho(_local.PastaRaizDados, _codigo.Text.Trim());
-                dono = _servicos.Bloqueios.CriarPorCodigo(_local.PastaRaizDados, _codigo.Text.Trim(), Guid.NewGuid(), "Cadastro", _local.NomeExibido);
+                dono = _servicos.Bloqueios.CriarPorCodigo(_local.PastaRaizDados, _codigo.Text.Trim(), Guid.NewGuid(), "Cadastro/Edicao", _local.NomeExibido);
                 _bloqueio = dono;
                 _heartbeat.Start();
-                var cadastro = new PilotoCadastro
+                var cadastro = _pilotoEdicao ?? new PilotoCadastro
                 {
                     Codigo = _codigo.Text.Trim(),
                     NomeModelo = _nome.Text.Trim(),
                     PastaOrigem = _origem.Text.Trim()
                 };
+
+                // Limpa componentes antigos se for edição total via Wizard
+                if (_pilotoEdicao != null)
+                {
+                    cadastro.Componentes.Clear();
+                    cadastro.Texturas.Clear();
+                }
 
                 foreach (var nomeComponente in
                     _etapaDeteccao.ComponentesSelecionados)

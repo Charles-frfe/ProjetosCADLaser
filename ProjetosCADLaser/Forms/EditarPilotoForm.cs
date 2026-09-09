@@ -21,10 +21,6 @@ namespace ProjetosCADLaser.Forms
         private RegistroBloqueio _bloqueio;
         private string _caminho;
 
-        // Novos controles para Adicionar Matriz
-        private readonly ComboBox _comboComponentes = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
-        private MatrizEditorControl _editorMatriz;
-
         public EditarPilotoForm(AppServices servicos, ConfiguracaoLocal local, PilotoCadastro piloto)
         {
             _servicos = servicos; _local = local; _piloto = piloto;
@@ -36,34 +32,22 @@ namespace ProjetosCADLaser.Forms
             _heartbeat.Tick += delegate { if (_bloqueio != null) try { _servicos.Bloqueios.Atualizar(_caminho, _bloqueio); } catch { } };
             FormClosed += delegate { _heartbeat.Stop(); if (_bloqueio != null) try { _servicos.Bloqueios.Remover(_caminho, _bloqueio); } catch { } _bloqueio = null; };
 
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 2, RowCount = 7 };
-
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 2, RowCount = 5 };
             layout.Controls.Add(new Label { Text = "Nome do modelo", AutoSize = true }, 0, 0);
             layout.Controls.Add(_nome, 1, 0);
-
             layout.Controls.Add(new Label { Text = "Nova Observação", AutoSize = true }, 0, 1);
             layout.Controls.Add(_observacao, 1, 1);
 
-            // Adição de Matriz semelhante ao Cadastro
-            layout.Controls.Add(new Label { Text = "--- Adicionar Nova Matriz ---", AutoSize = true, Margin = new Padding(0, 15, 0, 5), Font = new Font("Segoe UI", 9F, FontStyle.Bold) }, 0, 2);
-            layout.SetColumnSpan(layout.GetControlFromPosition(0, 2), 2);
-
-            layout.Controls.Add(new Label { Text = "Componente Alvo", AutoSize = true }, 0, 3);
-            foreach (var comp in _piloto.Componentes)
-            {
-                _comboComponentes.Items.Add(comp.Nome);
-            }
-            if (_comboComponentes.Items.Count > 0) _comboComponentes.SelectedIndex = 0;
-            layout.Controls.Add(_comboComponentes, 1, 3);
-
-            // Carrega as texturas do piloto para o editor de matrizes
-            _editorMatriz = new MatrizEditorControl(null, _piloto.Texturas.Select(t => t.Nome));
-            layout.Controls.Add(_editorMatriz, 0, 4);
-            layout.SetColumnSpan(_editorMatriz, 2);
-
-            var btnAdicionarMatriz = new Button { Text = "Adicionar Matriz ao Componente", AutoSize = true, Width = 250 };
-            btnAdicionarMatriz.Click += BtnAdicionarMatriz_Click;
-            layout.Controls.Add(btnAdicionarMatriz, 1, 5);
+            var addMatrizBtn = new Button { Text = "Adicionar Matrizes / Editar Estrutura no Assistente", AutoSize = true, Width = 350 };
+            addMatrizBtn.Click += delegate {
+                using (var form = new CadastroPilotoForm(_servicos, _local, piloto))
+                {
+                    form.ShowDialog(this);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+            };
+            layout.Controls.Add(addMatrizBtn, 1, 2);
 
             var salvar = new Button { Text = "Salvar Alterações e Fechar", AutoSize = true };
             salvar.Click += delegate { Salvar(); };
@@ -72,40 +56,10 @@ namespace ProjetosCADLaser.Forms
 
             var botoes = new FlowLayoutPanel { AutoSize = true, Margin = new Padding(0, 20, 0, 0) };
             botoes.Controls.Add(cancelar); botoes.Controls.Add(salvar);
-            layout.Controls.Add(botoes, 1, 6);
+            layout.Controls.Add(botoes, 1, 3);
 
             Controls.Add(layout);
             servicos.Tema.Aplicar(this);
-        }
-
-        private void BtnAdicionarMatriz_Click(object sender, EventArgs e)
-        {
-            if (_comboComponentes.SelectedIndex < 0) return;
-            string nomeComp = _comboComponentes.SelectedItem.ToString();
-            var comp = _piloto.Componentes.Find(c => c.Nome == nomeComp);
-            if (comp == null) return;
-
-            MatrizCadastro novaMatriz;
-            string erro;
-            if (!_editorMatriz.TentarCriarMatriz(out novaMatriz, out erro))
-            {
-                MessageBox.Show(this, erro, "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            foreach (var texNome in _editorMatriz.TexturasSelecionadas)
-            {
-                var textura = _piloto.Texturas.Find(t => t.Nome == texNome);
-                if (textura != null)
-                {
-                    novaMatriz.TexturasIds.Add(textura.Id);
-                }
-            }
-
-            // A inserção direta no objeto será salva no disco quando clicarmos em Salvar
-            comp.Matrizes.Add(novaMatriz);
-            MessageBox.Show(this, $"Matriz '{novaMatriz.Tipo}' adicionada ao componente '{comp.Nome}' com sucesso!\n\nAs alterações só serão efetivadas no disco ao clicar em 'Salvar Alterações e Fechar'.", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            _editorMatriz.Limpar();
         }
 
         private void Salvar()
@@ -117,7 +71,6 @@ namespace ProjetosCADLaser.Forms
                 dono = _servicos.Bloqueios.CriarPorCodigo(_local.PastaRaizDados, _piloto.Codigo, _piloto.Id, "Edição", _local.NomeExibido);
                 _caminho = caminho; _bloqueio = dono; _heartbeat.Start();
 
-                // Salva tudo e as matrizes que adicionamos no objeto já estarão persistidas em json
                 var editado = _servicos.EdicaoPiloto.Salvar(_local.PastaRaizDados, _piloto, _nome.Text, new Dictionary<Guid, string>(), _observacao.Text);
                 DialogResult = DialogResult.OK;
                 Close();
