@@ -109,10 +109,6 @@ namespace ProjetosCADLaser.Forms
                 };
                 pnlAnexos.Controls.Add(linkAnexo);
             }
-        }
-                    pnlAnexos.Controls.Add(pnlLinks);
-                }
-            }
 
             // Retaguarda caso tenha ficado algum anexo perdido no padrão antigo
             foreach (var anexo in piloto.Anexos)
