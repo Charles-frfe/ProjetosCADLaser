@@ -108,33 +108,27 @@ namespace ProjetosCADLaser.Forms
                 };
                 pnlAnexos.Controls.Add(linkAnexo);
             }
-        }
-                    pnlAnexos.Controls.Add(pnlLinks);
-                }
-            }
 
             // Retaguarda caso tenha ficado algum anexo perdido no padrão antigo
-            if (evento.Anexos != null)
-                    {
-                        foreach (var anexo in evento.Anexos)
-                        {
-                            var _anexoCaptura = anexo; // Captura para o delegate local
-var linkAnexo = new LinkLabel { Text = $"Abrir {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(20, 0, 10, 0) };
-linkAnexo.LinkClicked += delegate {
-                                var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
-                                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
-                            };
-                            pnlLinks.Controls.Add(linkAnexo);
-                        }
-                    }
-                    //... e logo abaixo pro loop de `piloto.Anexos` principal:
             foreach (var anexo in piloto.Anexos)
             {
                 var _anexoCaptura = anexo; // Captura para o delegate local
-var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
-linkAnexo.LinkClicked += delegate { 
+                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
+                linkAnexo.LinkClicked += delegate {
                     var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
-                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { } 
+                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
+                };
+                pnlAnexos.Controls.Add(linkAnexo);
+            }
+            abaAnexos.Controls.Add(pnlAnexos);
+            //... e logo abaixo pro loop de `piloto.Anexos` principal:
+            foreach (var anexo in piloto.Anexos)
+            {
+                var _anexoCaptura = anexo; // Captura para o delegate local
+                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
+                linkAnexo.LinkClicked += delegate {
+                    var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
+                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
                 };
                 pnlAnexos.Controls.Add(linkAnexo);
             }
@@ -179,14 +173,16 @@ linkAnexo.LinkClicked += delegate {
 
             // Rodapé de Ações (Apenas Editar Modelo)
             var botoes = new FlowLayoutPanel { Dock = DockStyle.Bottom, FlowDirection = FlowDirection.RightToLeft, Height = 60, Padding = new Padding(10) };
-var btnEditarModelo = new Button { Text = "Editar", AutoSize = true, Height = 35 };
-btnEditarModelo.Click += delegate { 
-                using (var form = new EditarPilotoForm(servicos, local, piloto)) {
-                    if (form.ShowDialog(this) == DialogResult.OK) {
-    Close();
-}
-}
-            }; 
+            var btnEditarModelo = new Button { Text = "Editar", AutoSize = true, Height = 35 };
+            btnEditarModelo.Click += delegate {
+                using (var form = new EditarPilotoForm(servicos, local, piloto))
+                {
+                    if (form.ShowDialog(this) == DialogResult.OK)
+                    {
+                        Close();
+                    }
+                }
+            };
 
             // O botão abre sua tela original de Edição/Retoque daquele modelo específico
             btnEditarModelo.Click += delegate {
@@ -219,6 +215,5 @@ btnEditarModelo.Click += delegate {
         }
     }
 }
-        
 
-    
+
