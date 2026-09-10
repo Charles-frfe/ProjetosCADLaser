@@ -8,12 +8,14 @@ using ProjetosCADLaser.Models;
 using ProjetosCADLaser.Services;
 using ProjetosCADLaser.Controls;
 using System.Threading.Tasks;
+using System.Linq;
 
 
 namespace ProjetosCADLaser.Forms
 {
     public sealed partial class CadastroPilotoForm : Form
     {
+        private readonly PictureBox _previewPdf = new PictureBox { Dock = DockStyle.Fill, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.White };
         private readonly AppServices _servicos;
         private readonly ConfiguracaoLocal _local;
         private readonly TextBox _codigo = new TextBox { Width = 220 };
@@ -100,14 +102,85 @@ namespace ProjetosCADLaser.Forms
 
             // ABA 1: Identificação (Sem Pasta de Origem)
             var abaOrigem = new TabPage("1. Identificação");
-            var pnlOrigem = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, Padding = new Padding(30) };
-            pnlOrigem.Controls.Add(new Label { Text = "Identificação do Projeto", Font = new Font("Segoe UI", 14F, FontStyle.Bold), Margin = new Padding(0, 0, 0, 15), AutoSize = true });
-            pnlOrigem.Controls.Add(new Label { Text = "Código do modelo:", AutoSize = true });
-            pnlOrigem.Controls.Add(_codigo);
-            _codigo.Leave += async delegate { await LocalizarPilotoAutomaticamente(); };
-            pnlOrigem.Controls.Add(new Label { Text = "Nome do modelo:", AutoSize = true, Margin = new Padding(0, 15, 0, 0) });
+
+            var layoutOrigem = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(30),
+                ColumnCount = 2,
+                RowCount = 1
+            };
+
+            layoutOrigem.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
+            layoutOrigem.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
+
+            var pnlOrigem = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false
+            };
+
+            pnlOrigem.Controls.Add(new Label
+            {
+                Text = "Identificação do Projeto",
+                Font = new Font("Segoe UI", 14F, FontStyle.Bold),
+                Margin = new Padding(0, 0, 0, 15),
+                AutoSize = true
+            });
+
+            pnlOrigem.Controls.Add(new Label
+            {
+                Text = "Código do modelo:",
+                AutoSize = true
+            });
+
+            var pnlCodigo = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                Margin = new Padding(0)
+            };
+
+            pnlCodigo.Controls.Add(_codigo);
+
+            pnlCodigo.Controls.Add(new Label
+            {
+                Text = "Pressione TAB para localizar",
+                AutoSize = true,
+                ForeColor = Color.DimGray,
+                Margin = new Padding(10, 5, 0, 0)
+            });
+
+            pnlOrigem.Controls.Add(pnlCodigo);
+
+            _codigo.Leave += async delegate
+            {
+                await LocalizarPilotoAutomaticamente();
+            };
+
+            pnlOrigem.Controls.Add(new Label
+            {
+                Text = "Nome do modelo:",
+                AutoSize = true,
+                Margin = new Padding(0, 15, 0, 0)
+            });
+
             pnlOrigem.Controls.Add(_nome);
-            abaOrigem.Controls.Add(pnlOrigem);
+
+            var pnlPreviewPdf = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(20, 0, 0, 0),
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            pnlPreviewPdf.Controls.Add(_previewPdf);
+
+            layoutOrigem.Controls.Add(pnlOrigem, 0, 0);
+            layoutOrigem.Controls.Add(pnlPreviewPdf, 1, 0);
+
+            abaOrigem.Controls.Add(layoutOrigem);
 
             // ABA 2: Escaneamento e Texturas (Mantido igual)
             var abaComponentes = new TabPage("2. Escaneamento");
@@ -187,6 +260,54 @@ namespace ProjetosCADLaser.Forms
         private Button _btnAvancar;
 
         // Lógica de Navegação
+        private void CarregarPreviewPdf(string pastaPiloto, string codigo)
+        {
+            try
+            {
+                if (_previewPdf.Image != null)
+                {
+                    var imagemAnterior = _previewPdf.Image;
+                    _previewPdf.Image = null;
+                    imagemAnterior.Dispose();
+                }
+
+                if (string.IsNullOrWhiteSpace(pastaPiloto) ||
+                    string.IsNullOrWhiteSpace(codigo))
+                    return;
+
+                var codigoLimpo = new string(codigo.Where(char.IsDigit).ToArray());
+
+                if (codigoLimpo.Length < 5)
+                    return;
+
+                var nomePdf = codigoLimpo.Substring(0, 5) + ".pdf";
+
+                var caminhoPdf = Path.Combine(pastaPiloto, nomePdf);
+
+                if (!File.Exists(caminhoPdf))
+                    return;
+
+                using (var documento = PdfiumViewer.PdfDocument.Load(caminhoPdf))
+                {
+                    var tamanho = documento.PageSizes[0];
+
+                    var imagem = documento.Render(
+                        0,
+                        (int)(tamanho.Width * 2),
+                        (int)(tamanho.Height * 2),
+                        150,
+                        150,
+                        PdfiumViewer.PdfRenderFlags.Annotations);
+
+                    _previewPdf.Image = imagem;
+                }
+            }
+            catch
+            {
+                // O PDF é apenas uma pré-visualização.
+                // Qualquer falha não deve impedir o cadastro da piloto.
+            }
+        }
         private void BtnAvancar_Click(object sender, EventArgs e)
         {
             if (_wizardTab.SelectedIndex < _wizardTab.TabCount - 1)
@@ -274,6 +395,8 @@ namespace ProjetosCADLaser.Forms
                     resultado.PastasEncontradas[0];
 
                 _origem.Text = pastaEncontrada;
+
+                CarregarPreviewPdf(pastaEncontrada, codigo);
 
                 var identificacao =
                 AnalisadorPastasService.IdentificarRaiz(
