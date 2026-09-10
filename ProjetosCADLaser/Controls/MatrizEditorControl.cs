@@ -54,8 +54,23 @@ namespace ProjetosCADLaser.Controls
                 new[]
                 {
                     "Gravação",
-                    "Tampa",
-                    "Laterais"
+        "Tampa",
+        "Lateral fixa",
+        "Lateral móvel",
+        "Lateral fixa direita",
+        "Lateral fixa esquerda",
+        "Lateral móvel direita",
+        "Lateral móvel esquerda",
+        "Postiço",
+        "Tacelo",
+        "Encaixe",
+        "Forma",
+        "Forma direita",
+        "Forma esquerda",
+        "Fundo",
+        "Fundo direito",
+        "Fundo esquerdo",
+        "Gaveta"
                 };
 
             foreach (var tipo in tipos)

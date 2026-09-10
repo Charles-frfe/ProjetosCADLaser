@@ -22,11 +22,17 @@ namespace ProjetosCADLaser.Services
             foreach (var pasta in raiz.EnumerateDirectories("*", SearchOption.AllDirectories))
             {
                 var pastaNormalizada = NormalizadorPesquisa.Normalizar(pasta.Name);
-                var componente = componentes.FirstOrDefault(d => PrependAliases(d.Nome, d.Apelidos).Any(alias => NormalizadorPesquisa.Normalizar(alias).Equals(pastaNormalizada, StringComparison.Ordinal)));
+
+                var componente = componentes.FirstOrDefault(d =>
+                PrependAliases(d.Nome, d.Apelidos)
+                .Any(alias =>
+                ContemComponente(pastaNormalizada, NormalizadorPesquisa.Normalizar(alias))));
+                
+
                 var relativo = CaminhoRelativo(raiz.FullName, pasta.FullName);
                 var profundidade = relativo.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Length;
                 ClassificacaoPasta classificacao; string origem; string valor = null;
-                if (componente != null) { resultado.Componentes.Add(new ComponenteDetectado(componente.Nome, pasta.FullName)); classificacao = ClassificacaoPasta.Componente; valor = componente.Nome; origem = NormalizadorPesquisa.Normalizar(componente.Nome) == pastaNormalizada ? "Nome oficial do componente" : "Apelido configurado de " + componente.Nome; }
+                if (componente != null) { resultado.Componentes.Add(new ComponenteDetectado(pasta.Name.ToUpperInvariant(), pasta.FullName)); classificacao = ClassificacaoPasta.Componente; valor = componente.Nome; origem = NormalizadorPesquisa.Normalizar(componente.Nome) == pastaNormalizada ? "Nome oficial do componente" : "Apelido configurado de " + componente.Nome; }
                 else if (TexturaRegex.IsMatch(pasta.Name)) { resultado.Texturas.Add(pasta.Name); classificacao = ClassificacaoPasta.Textura; valor = pasta.Name; origem = "Prefixo gl_ ou gls_"; }
                 else if (pastaNormalizada == "piloto") { resultado.PastasPiloto.Add(pasta.FullName); classificacao = ClassificacaoPasta.Piloto; origem = "Nome da pasta"; }
                 else if (pastaNormalizada == "escala") { resultado.PastasEscala.Add(pasta.FullName); classificacao = ClassificacaoPasta.Escala; origem = "Nome da pasta"; }
@@ -46,6 +52,21 @@ namespace ProjetosCADLaser.Services
         }
 
         private static IEnumerable<string> PrependAliases(string nome, IEnumerable<string> aliases) { yield return nome; foreach (var alias in aliases) yield return alias; }
+        private static bool ContemComponente(string nomePastaNormalizado, string componenteNormalizado)
+        {
+            if (string.IsNullOrWhiteSpace(nomePastaNormalizado) ||
+                string.IsNullOrWhiteSpace(componenteNormalizado))
+                return false;
+
+            var padrao = @"(^|\s)" +
+                         Regex.Escape(componenteNormalizado) +
+                         @"($|\s)";
+
+            return Regex.IsMatch(
+                nomePastaNormalizado,
+                padrao,
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        }
         private static string CaminhoRelativo(string raiz, string caminho)
         {
             var basePath = Path.GetFullPath(raiz).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;

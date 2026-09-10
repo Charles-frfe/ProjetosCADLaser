@@ -69,8 +69,64 @@ namespace ProjetosCADLaser.Models
     public sealed class CredencialPin { public string HashBase64 { get; set; } public string SaltBase64 { get; set; } public int Iteracoes { get; set; } public CredencialPin() { HashBase64 = string.Empty; SaltBase64 = string.Empty; } }
     public static class Padroes
     {
-        public static List<DefinicaoComponente> Componentes() { return new[] { "Palmilha", "Forquilha", "Gáspea", "Sola", "Cabedal", "Tira", "Lateral" }.Select(nome => new DefinicaoComponente { Nome = nome }).ToList(); }
-        public static List<ItemConfiguravel> TiposMatriz() { return new[] { "Gravação", "Tampa", "Laterais" }.Select(nome => new ItemConfiguravel { Nome = nome }).ToList(); }
+        public static List<DefinicaoComponente>
+            Componentes()
+        {
+            return new[]
+            {
+                "Palmilha",
+                "Forquilha",
+                "Gáspea",
+                "Sola",
+                "Cabedal",
+                "Tira",
+                "Lingueta",
+                "Fivela",
+                "Acessório",
+                "Lançador",
+                "Enfeite",
+                "Monobloco",
+                "Bolsa",
+                "Passador",
+                "Tope",
+                "Soleta",
+                "Tampa",
+                "Salto",
+                "Elos",
+                "Salomé",
+                "Cabedais"
+            }.Select(nome => new DefinicaoComponente
+            {
+                Nome = nome
+            })
+            .ToList();
+        }
+        public static List<ItemConfiguravel> TiposMatriz()
+        {
+            return new[]
+            {
+        "Gravação",
+        "Tampa",
+        "Lateral fixa",
+        "Lateral móvel",
+        "Lateral fixa direita",
+        "Lateral fixa esquerda",
+        "Lateral móvel direita",
+        "Lateral móvel esquerda",
+        "Postiço",
+        "Tacelo",
+        "Encaixe",
+        "Forma",
+        "Forma direita",
+        "Forma esquerda",
+        "Fundo",
+        "Fundo direito",
+        "Fundo esquerdo",
+        "Gaveta"
+    }
+            .Select(nome => new ItemConfiguravel { Nome = nome })
+            .ToList();
+        }
     }
     public sealed class RegistroExclusao { public Guid CadastroId { get; set; } public string Codigo { get; set; } public string Usuario { get; set; } public string Computador { get; set; } public DateTimeOffset DataHora { get; set; } public string Motivo { get; set; } public DateTimeOffset RestauravelAte { get; set; } public RegistroExclusao() { Codigo = string.Empty; Usuario = string.Empty; Computador = string.Empty; Motivo = string.Empty; DataHora = DateTimeOffset.Now; RestauravelAte = DateTimeOffset.Now.AddDays(7); } }
     public sealed class RegistroBloqueio { public Guid CadastroId { get; set; } public string Codigo { get; set; } public string Usuario { get; set; } public string NomeExibido { get; set; } public string Computador { get; set; } public int ProcessoId { get; set; } public Guid TokenSessao { get; set; } public string TipoOperacao { get; set; } public DateTimeOffset CriadoEm { get; set; } public DateTimeOffset UltimaAtualizacao { get; set; } public RegistroBloqueio() { Codigo = string.Empty; Usuario = string.Empty; NomeExibido = Environment.UserName; Computador = Environment.MachineName; TokenSessao = Guid.NewGuid(); TipoOperacao = "Edição"; CriadoEm = DateTimeOffset.Now; UltimaAtualizacao = DateTimeOffset.Now; } }

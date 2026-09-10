@@ -52,9 +52,10 @@ namespace ProjetosCADLaser.Forms
                     if (matriz.Acabamento.HasValue) nodeMatriz.Nodes.Add($"Acabamento: {matriz.Acabamento}");
 
                     // Coloca as texturas ligadas por Matriz. 
-                    foreach (var tex in piloto.Texturas)
+                    foreach (var tex in comp.Texturas)
                     {
-                        if (matriz.TexturasIds != null && matriz.TexturasIds.Contains(tex.Id))
+                        if(matriz.TexturasIds!=null &&
+                            matriz.TexturasIds.Contains(tex.Id))
                         {
                             nodeMatriz.Nodes.Add($"Textura: {tex.Nome}");
                         }
@@ -69,71 +70,301 @@ namespace ProjetosCADLaser.Forms
 
             // ABA 2: Observações e Anexos Vinculados
             var abaAnexos = new TabPage("Observações");
-            var pnlAnexos = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(10), FlowDirection = FlowDirection.TopDown, WrapContents = false };
 
-            // Loop processando o Histórico
+            var pnlAnexos = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                Padding = new Padding(15),
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false
+            };
+
+            var tituloObservacoes = new Label
+            {
+                Text = "Observações do projeto",
+                AutoSize = true,
+                Font = new Font("Segoe UI Semibold", 14F),
+                Margin = new Padding(0, 0, 0, 12)
+            };
+
+            pnlAnexos.Controls.Add(tituloObservacoes);
+
             foreach (var evento in piloto.Historico)
             {
-                if (evento.Tipo == TipoEvento.ObservacaoGeral || !string.IsNullOrWhiteSpace(evento.Observacao) || (evento.Anexos != null && evento.Anexos.Count > 0))
+                bool possuiObservacao =
+                    !string.IsNullOrWhiteSpace(evento.Observacao);
+
+                bool possuiAnexos =
+                    evento.Anexos != null &&
+                    evento.Anexos.Count > 0;
+
+                bool possuiImagens =
+                    evento.Imagens != null &&
+                    evento.Imagens.Count > 0;
+
+                if (!possuiObservacao &&
+                    !possuiAnexos &&
+                    !possuiImagens)
                 {
-                    // Removemos a data como você pediu, e deixamos só a observação
-                    var lblObs = new Label { Text = $"- {evento.Observacao ?? "Sem descrição"}", AutoSize = true, Font = new Font("Segoe UI", 11F), Margin = new Padding(0, 10, 0, 5) };
-                    pnlAnexos.Controls.Add(lblObs);
-
-                    var pnlLinks = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
-                    if (evento.Anexos != null)
-                    {
-                        foreach (var anexo in evento.Anexos)
-                        {
-                            var _anexoCaptura = anexo; // Captura para o delegate local
-                            var linkAnexo = new LinkLabel { Text = $"Abrir {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(20, 0, 10, 0) };
-                            linkAnexo.LinkClicked += delegate {
-                                var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
-                                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
-                            };
-                            pnlLinks.Controls.Add(linkAnexo);
-                        }
-                    }
-                    pnlAnexos.Controls.Add(pnlLinks);
+                    continue;
                 }
-            }
-            // Retaguarda de anexos base caso estejam salvos em piloto.Anexos e não dentro dos Eventos
-            foreach (var anexo in piloto.Anexos)
-            {
-                var _anexoCaptura = anexo; // Captura para o delegate local
-                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
-                linkAnexo.LinkClicked += delegate {
-                    var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
-                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
+
+                var linhaObservacao = new TableLayoutPanel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    ColumnCount = 2,
+                    RowCount = 1,
+                    Width = 900,
+                    Margin = new Padding(0, 0, 0, 10),
+                    Padding = new Padding(12),
+                    BackColor = Color.FromArgb(245, 245, 245)
                 };
-                pnlAnexos.Controls.Add(linkAnexo);
+
+                linhaObservacao.ColumnStyles.Add(
+                    new ColumnStyle(
+                        SizeType.Percent,
+                        70F));
+
+                linhaObservacao.ColumnStyles.Add(
+                    new ColumnStyle(
+                        SizeType.Percent,
+                        30F));
+
+                var lblObs = new Label
+                {
+                    Text = possuiObservacao
+                        ? evento.Observacao
+                        : "Sem descrição",
+                    AutoSize = true,
+                    MaximumSize = new Size(600, 0),
+                    Font = new Font(
+                        "Segoe UI",
+                        10.5F),
+                    Margin = new Padding(
+                        0,
+                        4,
+                        15,
+                        4)
+                };
+
+                linhaObservacao.Controls.Add(
+                    lblObs,
+                    0,
+                    0);
+
+                var pnlLinks =
+                    new FlowLayoutPanel
+                    {
+                        AutoSize = true,
+                        AutoSizeMode =
+                            AutoSizeMode.GrowAndShrink,
+                        FlowDirection =
+                            FlowDirection.LeftToRight,
+                        WrapContents = true,
+                        Margin = new Padding(
+                            0,
+                            0,
+                            0,
+                            0)
+                    };
+
+                if (evento.Anexos != null)
+                {
+                    foreach (var anexo in evento.Anexos)
+                    {
+                        var anexoCaptura = anexo;
+
+                        var linkAnexo =
+                            new LinkLabel
+                            {
+                                Text =
+                                    "Abrir " +
+                                    (
+                                        !string.IsNullOrWhiteSpace(
+                                            anexoCaptura.Titulo)
+                                        ? anexoCaptura.Titulo
+                                        : anexoCaptura.NomeOriginal
+                                    ),
+                                AutoSize = true,
+                                LinkColor =
+                                    Color.RoyalBlue,
+                                ActiveLinkColor =
+                                    Color.Navy,
+                                VisitedLinkColor =
+                                    Color.RoyalBlue,
+                                Font = new Font(
+                                    "Segoe UI Semibold",
+                                    9.5F),
+                                Margin = new Padding(
+                                    5,
+                                    4,
+                                    10,
+                                    4)
+                            };
+
+                        linkAnexo.LinkClicked +=
+                            delegate
+                            {
+                                var caminhoReal =
+                                    Path.Combine(
+                                        local.PastaRaizDados,
+                                        "Cadastros",
+                                        piloto.Codigo,
+                                        anexoCaptura
+                                            .CaminhoRelativo ??
+                                        string.Empty);
+
+                                if (!File.Exists(
+                                    caminhoReal))
+                                {
+                                    MessageBox.Show(
+                                        "Arquivo não encontrado.\n\n" +
+                                        "Caminho procurado:\n" +
+                                        caminhoReal,
+                                        "Anexo",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Warning);
+
+                                    return;
+                                }
+
+                                try
+                                {
+                                    System.Diagnostics
+                                        .Process.Start(
+                                            new System.Diagnostics
+                                                .ProcessStartInfo
+                                            {
+                                                FileName =
+                                                    caminhoReal,
+                                                UseShellExecute =
+                                                    true
+                                            });
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show(
+                                        "Não foi possível abrir o anexo.\n\n" +
+                                        "Caminho:\n" +
+                                        caminhoReal +
+                                        "\n\nErro:\n" +
+                                        ex.Message,
+                                        "Erro ao abrir anexo",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error);
+                                }
+                            };
+
+                        pnlLinks.Controls.Add(
+                            linkAnexo);
+                    }
+                }
+
+                if (evento.Imagens != null)
+                {
+                    foreach (var imagem in evento.Imagens)
+                    {
+                        var imagemCaptura = imagem;
+
+                        var linkImagem =
+                            new LinkLabel
+                            {
+                                Text =
+                                    "Abrir " +
+                                    (
+                                        !string.IsNullOrWhiteSpace(
+                                            imagemCaptura.Titulo)
+                                        ? imagemCaptura.Titulo
+                                        : imagemCaptura.NomeOriginal
+                                    ),
+                                AutoSize = true,
+                                LinkColor =
+                                    Color.RoyalBlue,
+                                ActiveLinkColor =
+                                    Color.Navy,
+                                VisitedLinkColor =
+                                    Color.RoyalBlue,
+                                Font = new Font(
+                                    "Segoe UI Semibold",
+                                    9.5F),
+                                Margin = new Padding(
+                                    5,
+                                    4,
+                                    10,
+                                    4)
+                            };
+
+                        linkImagem.LinkClicked +=
+                            delegate
+                            {
+                                var caminhoReal =
+                                    Path.Combine(
+                                        local.PastaRaizDados,
+                                        "Cadastros",
+                                        piloto.Codigo,
+                                        imagemCaptura
+                                            .CaminhoRelativo ??
+                                        string.Empty);
+
+                                if (!File.Exists(
+                                    caminhoReal))
+                                {
+                                    MessageBox.Show(
+                                        "Imagem não encontrada.\n\n" +
+                                        "Caminho procurado:\n" +
+                                        caminhoReal,
+                                        "Imagem",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Warning);
+
+                                    return;
+                                }
+
+                                try
+                                {
+                                    System.Diagnostics
+                                        .Process.Start(
+                                            new System.Diagnostics
+                                                .ProcessStartInfo
+                                            {
+                                                FileName =
+                                                    caminhoReal,
+                                                UseShellExecute =
+                                                    true
+                                            });
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show(
+                                        "Não foi possível abrir a imagem.\n\n" +
+                                        "Caminho:\n" +
+                                        caminhoReal +
+                                        "\n\nErro:\n" +
+                                        ex.Message,
+                                        "Erro ao abrir imagem",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error);
+                                }
+                            };
+
+                        pnlLinks.Controls.Add(
+                            linkImagem);
+                    }
+                }
+
+                linhaObservacao.Controls.Add(
+                    pnlLinks,
+                    1,
+                    0);
+
+                pnlAnexos.Controls.Add(
+                    linhaObservacao);
             }
 
-            // Retaguarda caso tenha ficado algum anexo perdido no padrão antigo
-            foreach (var anexo in piloto.Anexos)
-            {
-                var _anexoCaptura = anexo; // Captura para o delegate local
-                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
-                linkAnexo.LinkClicked += delegate {
-                    var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
-                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
-                };
-                pnlAnexos.Controls.Add(linkAnexo);
-            }
-            abaAnexos.Controls.Add(pnlAnexos);
-            //... e logo abaixo pro loop de `piloto.Anexos` principal:
-            foreach (var anexo in piloto.Anexos)
-            {
-                var _anexoCaptura = anexo; // Captura para o delegate local
-                var linkAnexo = new LinkLabel { Text = $"Arquivo: {(_anexoCaptura.Titulo ?? _anexoCaptura.NomeOriginal)}", AutoSize = true, Margin = new Padding(5, 5, 0, 0) };
-                linkAnexo.LinkClicked += delegate {
-                    var _caminhoReal = System.IO.Path.Combine(local.PastaRaizDados, "Cadastros", piloto.Codigo, "anexos", _anexoCaptura.CaminhoRelativo ?? string.Empty);
-                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = _caminhoReal, UseShellExecute = true }); } catch { }
-                };
-                pnlAnexos.Controls.Add(linkAnexo);
-            }
-            abaAnexos.Controls.Add(pnlAnexos);
-
+            abaAnexos.Controls.Add(
+                pnlAnexos);
             // ABA 3: Histórico de Auditoria
             var abaAuditoria = new TabPage("Histórico de Alterações");
             var gridHistorico = new DataGridView
@@ -183,14 +414,6 @@ namespace ProjetosCADLaser.Forms
                     }
                 }
             };
-
-            // O botão abre sua tela original de Edição/Retoque daquele modelo específico
-            btnEditarModelo.Click += delegate {
-                using (var form = new EditarPilotoForm(servicos, local, piloto))
-                    if (form.ShowDialog(this) == DialogResult.OK)
-                        Close(); // Ao finalizar a edição, fecha a ficha pro usuário reabri-la atualizada
-            };
-
             botoes.Controls.Add(btnEditarModelo);
 
             // Montagem final
